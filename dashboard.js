@@ -17,37 +17,31 @@ import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/fire
     const SCOPES = 'https://www.googleapis.com/auth/drive.file';
     // id da pasta criada no google drive, criada no passo 3.
     const FOLDER_ID = '1HwqWTzcmIoOWWxjHHBF9xq9LOmcSTUig';
-    const REDIRECT_URI = 'http://localhost:5500/oauth2callback'
+     const REDIRECT_URI = 'https://portal-docentes.vercel.app/oauth2callback'
         let tokenClient;
         let gapiInited = false;
 
-    async function initGapi(){
-         return new Promise( (resolve, reject) => {
-            // Initialize the Google API client
-             function handleClientLoad() {
-                 gapi.load('client', initClient);
-                   console.log('dashboard.js: gapi carregado.');
-             }
-          // Initialize the client
-             async function initClient() {
-                 try{
-                     await gapi.client.init({
-                        clientId: CLIENT_ID,
-                        scope: SCOPES,
-                    });
-                       console.log('dashboard.js: gapi inicializado.');
-                     gapiInited = true;
-                     resolve();
-                 } catch(error){
-                    console.error("dashboard.js: Erro ao inicializar a API do Google", error);
-                     reject(error)
-                 }
-            };
-              handleClientLoad();
-        })
+   // Initialize the Google API client
+   function handleClientLoad() {
+       gapi.load('client', initClient);
+        console.log('dashboard.js: gapi carregado.');
    }
 
-    async function signIn(){
+  // Initialize the client
+    async function initClient() {
+      try{
+          await gapi.client.init({
+            clientId: CLIENT_ID,
+             scope: SCOPES,
+         });
+            console.log('dashboard.js: gapi inicializado.');
+           gapiInited = true;
+        } catch(error){
+           console.error("dashboard.js: Erro ao inicializar a API do Google", error);
+       }
+    };
+     // Sign in with google
+  async function signIn(){
             console.log('dashboard.js: Iniciando a função signIn()...');
             if(gapiInited === false) {
                alert('dashboard.js: A api do google não foi inicializada, tente novamente!');
@@ -79,6 +73,7 @@ import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/fire
                 return false;
            }
        }
+
 document.addEventListener("DOMContentLoaded", async () => {
     // Inicializar Firebase
          console.log('dashboard.js: Inicializando o Firebase...');
@@ -88,12 +83,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error){
           console.error("dashboard.js: Erro ao inicializar o Firebase:", error);
     }
-     try{
-        await initGapi();
-    } catch (error){
-        console.error("dashboard.js: initGapi falhou", error);
-    }
     
+     handleClientLoad()
+     initClient();
+
+
     const logoutBtn = document.getElementById('logoutBtn');
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -118,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
              if (href === "#controle-evasao"){
                    window.open("https://forms.office.com/r/fBNbhiYfsb", "_blank");
                 } else if (href === "#enviar-documentos"){
-                    const signInSuccess = await signIn();
+                     const signInSuccess = await signIn();
                      if(signInSuccess) {
                         console.log('dashboard.js: signIn concluido, redirecionando para enviar-documentos.html');
                           window.location.href = 'enviar-documentos.html';
