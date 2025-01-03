@@ -17,57 +17,28 @@ const firebaseConfig = {
   const CLIENT_ID = '1067241825747-5i4mt2ud9m4q3qos8s0hn2ar4jgg256m.apps.googleusercontent.com';
   // google drive API scope.
   const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-let tokenClient;
-let gapiInited = false;
-// Initialize the Google API client
+ let tokenClient;
+  let gapiInited = false;
+
+    // Initialize the Google API client
 function handleClientLoad() {
-gapi.load('client', initClient);
-  console.log('enviar-documentos.js: gapi carregado.');
-}
-   // Initialize the client
-async function initClient() {
- try{
-    await gapi.client.init({
-        clientId: CLIENT_ID,
-         scope: SCOPES,
-    });
-        console.log('enviar-documentos.js: gapi inicializado com sucesso.');
-        gapiInited = true;
- } catch (error){
-      console.error("enviar-documentos.js: Erro ao inicializar a API do Google", error);
- }
-};
-
-async function signIn(){
-        console.log('enviar-documentos.js: Iniciando a função signIn()...');
-        if(gapiInited === false) {
-          alert('enviar-documentos.js: A api do google não foi inicializada, tente novamente!');
-           return;
-        }
-        console.log('enviar-documentos.js: gapiInited === true.');
-       tokenClient = google.accounts.oauth2.initTokenClient({
-         client_id: CLIENT_ID,
-         scope: SCOPES,
-         callback: '', // workaround for gapi issue
-      });
-       console.log('enviar-documentos.js: tokenClient criado.');
-      try{
-         await new Promise(resolve =>{
-           tokenClient.callback = async (resp) => {
-            if (resp.error !== undefined) {
-               throw (resp);
-            }
-                resolve(resp);
-          };
-          tokenClient.requestAccessToken();
-            console.log('enviar-documentos.js: accessToken requisitado com sucesso.');
-       });
-       } catch(error){
-          alert("enviar-documentos.js: Houve um problema ao fazer o login com o google, tente novamente");
-         console.error('enviar-documentos.js: Erro ao fazer login:', error);
-       }
+     gapi.load('client', initClient);
+        console.log('enviar-documentos.js: gapi carregado.');
     }
-
+// Initialize the client
+async function initClient() {
+        try{
+            await gapi.client.init({
+                clientId: CLIENT_ID,
+                scope: SCOPES,
+         });
+            console.log('enviar-documentos.js: gapi inicializado com sucesso.');
+        gapiInited = true;
+      } catch (error) {
+            console.error("enviar-documentos.js: Erro ao inicializar o gapi:", error);
+      }
+};
+   initClient();
 document.addEventListener('DOMContentLoaded', async () => {
 // Inicializar Firebase
     try{
@@ -79,9 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 } catch (error){
         console.error("enviar-documentos.js: Erro ao inicializar o Firebase:", error);
 }
- handleClientLoad();
- await initClient();
- await signIn();
 
 const documentForm = document.getElementById('documentForm');
 const statusDiv = document.getElementById('status');
@@ -112,7 +80,7 @@ documentForm.addEventListener('submit', async (e) => {
                     timestamp: new Date(),
                 });
                statusDiv.textContent = 'Documento enviado com sucesso!';
-               console.log('enviar-documentos.js: Dados enviados para o firestore com sucesso.');
+                console.log('enviar-documentos.js: Dados enviados para o firestore com sucesso.');
                 documentForm.reset();
              } else{
                  statusDiv.textContent = 'Erro ao fazer upload do arquivo.';
