@@ -2,6 +2,7 @@ import { uploadFile } from './dashboard.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {gapiLoad, gapiClientInit, gapiAuthSignOut, gapiAuthRequestAccessToken, gapi} from "./gapi-utils.js"
 
  // Configuração do Firebase
 const firebaseConfig = {
@@ -17,39 +18,30 @@ const firebaseConfig = {
   const CLIENT_ID = '1067241825747-5i4mt2ud9m4q3qos8s0hn2ar4jgg256m.apps.googleusercontent.com';
   // google drive API scope.
   const SCOPES = 'https://www.googleapis.com/auth/drive.file';
- let tokenClient;
-  let gapiInited = false;
+let gapiInited = false;
+   // Initialize the Google API client
+     async function initGapi(){
+         try{
+            await gapiClientInit(CLIENT_ID, SCOPES);
+             gapiInited = true;
+        } catch (error){
+             console.error("enviar-documentos.js: Erro ao inicializar a API do Google", error);
+             alert('enviar-documentos.js: Erro ao inicializar a API do Google, tente novamente!');
+        }
+    };
 
-    // Initialize the Google API client
-function handleClientLoad() {
-     gapi.load('client', initClient);
-        console.log('enviar-documentos.js: gapi carregado.');
-    }
-// Initialize the client
-async function initClient() {
-        try{
-            await gapi.client.init({
-                clientId: CLIENT_ID,
-                scope: SCOPES,
-         });
-            console.log('enviar-documentos.js: gapi inicializado com sucesso.');
-        gapiInited = true;
-      } catch (error) {
-            console.error("enviar-documentos.js: Erro ao inicializar o gapi:", error);
-      }
-};
-   initClient();
 document.addEventListener('DOMContentLoaded', async () => {
 // Inicializar Firebase
+     console.log('enviar-documentos.js: Inicializando o Firebase...');
     try{
-        console.log('enviar-documentos.js: Inicializando o Firebase...');
-    const app = initializeApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig);
      const db = getFirestore(app);
      const auth = getAuth(app);
      console.log('enviar-documentos.js: Firebase inicializado com sucesso.');
-} catch (error){
-        console.error("enviar-documentos.js: Erro ao inicializar o Firebase:", error);
+     } catch (error){
+         console.error("enviar-documentos.js: Erro ao inicializar o Firebase:", error);
 }
+    await initGapi();
 
 const documentForm = document.getElementById('documentForm');
 const statusDiv = document.getElementById('status');

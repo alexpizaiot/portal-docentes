@@ -1,5 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {gapiLoad, gapiClientInit, gapiAuthSignOut, gapiAuthRequestAccessToken, gapi} from "./gapi-utils.js"
 
     // Configuração do Firebase
     const firebaseConfig = {
@@ -17,81 +18,59 @@ import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/fire
     const SCOPES = 'https://www.googleapis.com/auth/drive.file';
     // id da pasta criada no google drive, criada no passo 3.
     const FOLDER_ID = '1HwqWTzcmIoOWWxjHHBF9xq9LOmcSTUig';
-    const REDIRECT_URI = 'https://portal-docentes.vercel.app/oauth2callback'
-        let tokenClient;
-        let gapiInited = false;
+    const REDIRECT_URI = 'https://portal-docentes.vercel.app/oauth2callback';
 
-    async function initGapi(){
-         return new Promise( (resolve, reject) => {
-            // Initialize the Google API client
-             function handleClientLoad() {
-                 gapi.load('client', initClient);
-                   console.log('dashboard.js: gapi carregado.');
-             }
-          // Initialize the client
-             async function initClient() {
-                 try{
-                     await gapi.client.init({
-                        clientId: CLIENT_ID,
-                        scope: SCOPES,
-                    });
-                       console.log('dashboard.js: gapi inicializado.');
-                     gapiInited = true;
-                     resolve();
-                 } catch(error){
-                    console.error("dashboard.js: Erro ao inicializar a API do Google", error);
-                     reject(error)
-                 }
-            };
-              handleClientLoad();
-        })
-   }
+ let gapiInited = false;
+
 
     async function signIn(){
-            console.log('dashboard.js: Iniciando a função signIn()...');
-            if(gapiInited === false) {
-               alert('dashboard.js: A api do google não foi inicializada, tente novamente!');
-                return false;
-            }
-             console.log('dashboard.js: gapiInited === true.');
-           tokenClient = google.accounts.oauth2.initTokenClient({
-              client_id: CLIENT_ID,
+        try{
+         console.log('dashboard.js: Iniciando a função signIn()...');
+           if(gapiInited === false) {
+            alert('dashboard.js: A api do google não foi inicializada, tente novamente!');
+             return false;
+          }
+         console.log('dashboard.js: gapiInited === true.');
+         tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
               scope: SCOPES,
-              redirect_uri: REDIRECT_URI,
-              callback: '', // workaround for gapi issue
-            });
-             console.log('dashboard.js: tokenClient criado.');
-             try{
-               await new Promise(resolve =>{
+                redirect_uri: REDIRECT_URI,
+                 callback: '', // workaround for gapi issue
+          });
+          console.log('dashboard.js: tokenClient criado.');
+           await new Promise(resolve =>{
                  tokenClient.callback = async (resp) => {
-                     if (resp.error !== undefined) {
-                        throw (resp);
-                   }
-                       resolve(resp);
-                  };
-               tokenClient.requestAccessToken();
-               console.log('dashboard.js: accessToken requisitado com sucesso.');
-              });
-                 return true;
+                 if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                 resolve(resp);
+              };
+              tokenClient.requestAccessToken();
+           console.log('dashboard.js: accessToken requisitado com sucesso.');
+           });
+              return true;
            } catch(error){
-               console.error("dashboard.js: Houve um problema ao fazer o login com o google, tente novamente", error);
-                alert("dashboard.js: Houve um problema ao fazer o login com o google, tente novamente");
+             console.error("dashboard.js: Houve um problema ao fazer o login com o google, tente novamente", error);
+               alert("dashboard.js: Houve um problema ao fazer o login com o google, tente novamente");
                 return false;
            }
-       }
-document.addEventListener("DOMContentLoaded", async () => {
-    // Inicializar Firebase
-         console.log('dashboard.js: Inicializando o Firebase...');
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+       console.log('dashboard.js: Iniciando o Firebase...');
         try{
         const app = initializeApp(firebaseConfig);
-         console.log('dashboard.js: Firebase inicializado com sucesso.');
+        console.log('dashboard.js: Firebase inicializado com sucesso.');
     } catch (error){
           console.error("dashboard.js: Erro ao inicializar o Firebase:", error);
     }
-     try{
-        await initGapi();
-    } catch (error){
+    try{
+         await gapiLoad();
+        await gapiClientInit(CLIENT_ID, SCOPES);
+          gapiInited = true;
+    } catch (error) {
         console.error("dashboard.js: initGapi falhou", error);
+         alert("dashboard.js: initGapi falhou");
     }
     
     const logoutBtn = document.getElementById('logoutBtn');
@@ -118,9 +97,9 @@ document.addEventListener("DOMContentLoaded", async () => {
              if (href === "#controle-evasao"){
                    window.open("https://forms.office.com/r/fBNbhiYfsb", "_blank");
                 } else if (href === "#enviar-documentos"){
-                     const signInSuccess = await signIn();
+                  const signInSuccess = await signIn();
                      if(signInSuccess) {
-                        console.log('dashboard.js: signIn concluido, redirecionando para enviar-documentos.html');
+                       console.log('dashboard.js: signIn concluido, redirecionando para enviar-documentos.html');
                           window.location.href = 'enviar-documentos.html';
                        }
                 } else {
