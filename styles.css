@@ -1,0 +1,188 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+/* Estilos para o container da página de login */
+.container {
+  text-align: center;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+}
+
+/* Estilo para os titulos da pagina de login */
+h1 {
+  margin-bottom: 20px;
+}
+
+/* Estilo para o botão da pagina de login */
+button {
+  padding: 10px 20px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Estilo para o hover do botão da pagina de login */
+button:hover {
+  background-color: #357ae8;
+}
+
+/* Estilo para o status da pagina de login */
+#status {
+  margin-top: 20px;
+  color: #333;
+}
+
+/* Estilos para a dashboard */
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 58px 0 0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  width: 220px;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+  padding: 10px 20px;
+}
+  
+.sidebar .nav-link:hover {
+  color: #007bff;
+  background-color: #e9ecef;
+}
+  
+.sidebar .nav-link.active {
+  color: #007bff;
+  background-color: #e9ecef;
+}
+
+
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+.main {
+  margin-left: 220px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
+  max-width: 100%;
+  box-shadow: none;
+  height: auto; /* remove o height e adiciona um padding bottom */
+  padding-bottom: 20px;
+}
+  
+/* Estilo do cabeçalho da pagina de boas vindas */
+.main .dashboard-header {
+  display: flex;
+  justify-content: center; /* centralizar o titulo na horizontal */
+  align-items: center; /* alinhar o titulo na vertical */
+  padding: 20px; /* padding para dar espaço */
+  width: 100%;
+  text-align: center; /* Alinha o texto ao centro */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+  text-align: center;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 80%;
+}
+
+.welcome-message h2 {
+  color: red;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+  
+.welcome-message p {
+  color: #666;
+  font-size: 1.1rem;
+}
+  
+/* remove o estilo padrão de link*/
+a{
+  text-decoration: none;
+}
+  
+/* Estilos responsivos */
+/* Em telas menores que 768px */
+@media (max-width: 767.98px) {
+
+  .sidebar {
+      position: fixed;
+      top: 0;
+      left: -220px;
+      bottom: 0;
+      z-index: 1000;
+      padding: 58px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+      background-color: #f8f9fa;
+      transition: all 0.3s ease;
+      width: 220px;
+  }
+  
+  .main {
+      margin-left: 0;
+      padding: 10px;
+  }
+  
+  .sidebar.active {
+      left: 0;
+  }
+  
+  .welcome-message {
+      max-width: 90%;
+  }
+      
+  .main .container {
+      height: auto;
+  }
+  
+  body {
+      display: flex;
+      flex-direction: column;
+  }
+}
