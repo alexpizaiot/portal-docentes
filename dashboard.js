@@ -19,10 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const href = link.getAttribute("href");
             if (href !== "#"){
-               const targetElement = document.querySelector(href);
-               if (targetElement) {
-                   targetElement.scrollIntoView({behavior: "smooth"});
+              if (href === "#controle-evasao"){
+                 window.open("https://forms.office.com/r/fBNbhiYfsb", "_blank");
+               } else {
+                const targetElement = document.querySelector(href);
+                if (targetElement) {
+                    targetElement.scrollIntoView({behavior: "smooth"});
               }
+             }
             }
         });
     });
