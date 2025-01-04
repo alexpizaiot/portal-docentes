@@ -52,7 +52,7 @@ button:hover {
 }
 
 .row {
-  margin: 0;
+   margin: 0;
 }
 
 .sidebar {
@@ -69,20 +69,20 @@ button:hover {
 }
 
 .sidebar .nav-link {
-  font-weight: 500;
-  color: #333;
-  padding: 10px 20px;
-}
+    font-weight: 500;
+    color: #333;
+    padding: 10px 20px;
+  }
   
-.sidebar .nav-link:hover {
-  color: #007bff;
-  background-color: #e9ecef;
-}
+  .sidebar .nav-link:hover {
+    color: #007bff;
+    background-color: #e9ecef;
+  }
   
-.sidebar .nav-link.active {
-  color: #007bff;
-  background-color: #e9ecef;
-}
+  .sidebar .nav-link.active {
+    color: #007bff;
+    background-color: #e9ecef;
+  }
 
 
 .sidebar-heading {
@@ -105,82 +105,69 @@ button:hover {
   align-items: center;
   justify-content: center;
   padding-top: 20px;
+  height: 80vh;
   max-width: 100%;
   box-shadow: none;
-  height: auto; /* remove o height e adiciona um padding bottom */
-  padding-bottom: 20px;
-}
-  
-/* Estilo do cabeçalho da pagina de boas vindas */
-.main .dashboard-header {
-  display: flex;
-  justify-content: center; /* centralizar o titulo na horizontal */
-  align-items: center; /* alinhar o titulo na vertical */
-  padding: 20px; /* padding para dar espaço */
-  width: 100%;
-  text-align: center; /* Alinha o texto ao centro */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .welcome-message {
-  text-align: center;
-  padding: 20px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 80%;
+text-align: center;
+padding: 20px;
+background-color: white;
+border-radius: 10px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+max-width: 80%;
 }
 
 .welcome-message h2 {
-  color: red;
+color: red;
   margin-bottom: 15px;
   font-size: 1.5rem;
 }
-  
+
 .welcome-message p {
   color: #666;
   font-size: 1.1rem;
 }
-  
+
 /* remove o estilo padrão de link*/
 a{
-  text-decoration: none;
+ text-decoration: none;
 }
-  
 /* Estilos responsivos */
 /* Em telas menores que 768px */
 @media (max-width: 767.98px) {
 
   .sidebar {
-      position: fixed;
-      top: 0;
-      left: -220px;
-      bottom: 0;
-      z-index: 1000;
-      padding: 58px 0 0;
-      box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-      background-color: #f8f9fa;
-      transition: all 0.3s ease;
-      width: 220px;
+    position: fixed;
+    top: 0;
+    left: -220px;
+    bottom: 0;
+    z-index: 1000;
+    padding: 58px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    width: 220px;
   }
-  
+
   .main {
-      margin-left: 0;
-      padding: 10px;
+    margin-left: 0;
+    padding: 10px;
   }
-  
+
   .sidebar.active {
       left: 0;
   }
-  
+
   .welcome-message {
       max-width: 90%;
   }
-      
+
   .main .container {
       height: auto;
   }
-  
+
   body {
       display: flex;
       flex-direction: column;

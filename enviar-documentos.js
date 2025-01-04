@@ -2,7 +2,6 @@ import { uploadFile } from './dashboard.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import {gapiLoad, gapiClientInit, gapiAuthSignOut, gapiAuthRequestAccessToken, gapi} from "./gapi-utils.js"
 
  // Configuração do Firebase
 const firebaseConfig = {
@@ -14,34 +13,16 @@ const firebaseConfig = {
     appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
 };
 
-  // google client Id, criado no passo 2
-  const CLIENT_ID = '1067241825747-5i4mt2ud9m4q3qos8s0hn2ar4jgg256m.apps.googleusercontent.com';
-  // google drive API scope.
-  const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-let gapiInited = false;
-   // Initialize the Google API client
-     async function initGapi(){
-         try{
-            await gapiClientInit(CLIENT_ID, SCOPES);
-             gapiInited = true;
-        } catch (error){
-             console.error("enviar-documentos.js: Erro ao inicializar a API do Google", error);
-             alert('enviar-documentos.js: Erro ao inicializar a API do Google, tente novamente!');
-        }
-    };
-
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 // Inicializar Firebase
-     console.log('enviar-documentos.js: Inicializando o Firebase...');
     try{
-        const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
      const db = getFirestore(app);
      const auth = getAuth(app);
      console.log('enviar-documentos.js: Firebase inicializado com sucesso.');
-     } catch (error){
-         console.error("enviar-documentos.js: Erro ao inicializar o Firebase:", error);
+} catch (error){
+        console.error("enviar-documentos.js: Erro ao inicializar o Firebase:", error);
 }
-    await initGapi();
 
 const documentForm = document.getElementById('documentForm');
 const statusDiv = document.getElementById('status');
