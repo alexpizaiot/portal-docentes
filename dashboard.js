@@ -2,14 +2,15 @@ import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/fire
 
 document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById('logoutBtn');
-        logoutBtn.addEventListener('click', async (e) => {
+        logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             const auth = getAuth();
            try {
-               console.log("dashboard.js: Iniciando o signout")
-                await signOut(auth);
-                console.log("dashboard.js: signout realizado com sucesso")
-                window.location.href = 'index.html';
+             console.log("dashboard.js: Iniciando o signout")
+                signOut(auth).then(()=>{
+                    console.log("dashboard.js: signout realizado com sucesso")
+                    window.location.href = 'index.html';
+                });
            } catch (error){
                 console.error("dashboard.js: Erro ao sair:", error);
             }
