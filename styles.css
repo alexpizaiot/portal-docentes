@@ -1,23 +1,56 @@
-/* Carrossel de Imagens */
-.carousel img {
-  height: 300px;
-  object-fit: cover;
+/* Tela de Login */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f4f4f9;
+}
+
+.container {
+  text-align: center;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* Botão de Login */
+button {
+  padding: 12px 25px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
   border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-/* Ajustes Gerais */
-.main {
-  margin-left: 220px;
-  padding: 20px;
+button:hover {
+  background-color: #357ae8;
 }
 
-.welcome-message {
-  max-width: 100%;
-}
-
-/* Ajustes Responsivos */
-@media (max-width: 767.98px) {
-  .carousel img {
-      height: 200px;
+/* Efeito de animação */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
