@@ -5,15 +5,15 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             const auth = getAuth();
-           try {
-             console.log("dashboard.js: Iniciando o signout")
-                signOut(auth).then(()=>{
-                    console.log("dashboard.js: signout realizado com sucesso")
-                    window.location.href = 'index.html';
-                });
-           } catch (error){
-                console.error("dashboard.js: Erro ao sair:", error);
-            }
+           
+               console.log("dashboard.js: Iniciando o signout")
+                signOut(auth).then(()=> {
+                    console.log("dashboard.js: signout realizado com sucesso");
+                     window.location.href = 'index.html';
+                }).catch((error) => {
+                     console.error("dashboard.js: Erro ao sair:", error);
+                  alert('dashboard.js: Erro ao sair')
+                 });
         });
 
     const navLinks = document.querySelectorAll(".nav-link");
