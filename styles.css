@@ -22,6 +22,7 @@ body {
 /* Estilo para os titulos da pagina de login */
 h1 {
   margin-bottom: 20px;
+   color: red; /* Mudança da cor para vermelho */
 }
 
 /* Estilo para o botão da pagina de login */
@@ -120,7 +121,7 @@ max-width: 80%;
 }
 
 .welcome-message h2 {
-color: red;
+  color: red;
   margin-bottom: 15px;
   font-size: 1.5rem;
 }
