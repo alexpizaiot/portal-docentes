@@ -6,10 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const auth = getAuth();
            try {
+               console.log("dashboard.js: Iniciando o signout")
                 await signOut(auth);
+                console.log("dashboard.js: signout realizado com sucesso")
                 window.location.href = 'index.html';
            } catch (error){
-                console.error("Erro ao sair:", error);
+                console.error("dashboard.js: Erro ao sair:", error);
             }
         });
 
