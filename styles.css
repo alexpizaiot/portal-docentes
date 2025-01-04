@@ -74,6 +74,61 @@ button:hover {
   border-radius: 10px; /* Adiciona bordas arredondadas */
 }
 
+/* Menu Lateral */
+#sidebar {
+  background-color: #343a40;
+  color: #ffffff;
+  min-height: 100vh;
+  padding-top: 20px;
+  transition: all 0.3s ease;
+}
+
+#sidebar .nav-link {
+  color: #dcdcdc;
+  font-size: 16px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+#sidebar .nav-link i {
+  margin-right: 10px;
+}
+
+#sidebar .nav-link:hover {
+  background-color: #495057;
+  color: #ffffff;
+  border-radius: 4px;
+}
+
+#sidebar .nav-link.active {
+  background-color: #007bff;
+  color: #ffffff;
+  border-radius: 4px;
+}
+
+/* Botão de Menu Hambúrguer */
+#menuButton {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1050;
+  display: none;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#menuButton:hover {
+  background-color: #0056b3;
+}
+
 /* Ajustes Responsivos */
 @media (max-width: 767.98px) {
   .carousel {
@@ -82,5 +137,27 @@ button:hover {
 
   .carousel img {
     height: 200px; /* Reduz a altura das imagens em dispositivos móveis */
+  }
+
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: -220px;
+    width: 220px;
+    z-index: 1040;
+    height: 100%;
+    box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
+  }
+
+  #sidebar.active {
+    left: 0;
+  }
+
+  #menuButton {
+    display: block;
+  }
+
+  .main {
+    margin-left: 0;
   }
 }

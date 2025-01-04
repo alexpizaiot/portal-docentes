@@ -58,22 +58,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Botão de menu (para dispositivos móveis)
-    const menuButton = document.createElement("button");
-    menuButton.textContent = "☰"; // Ícone do menu
-    menuButton.classList.add("btn", "btn-light", "d-md-none");
-    document.querySelector("body").prepend(menuButton); // Adiciona o botão no topo da página
+    // Controle do Menu Lateral Responsivo
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
 
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-        menuButton.addEventListener("click", (event) => {
-            event.stopPropagation(); // Impede que o clique se propague para outros eventos
-            sidebar.classList.toggle("active");
+    if (menuButton && sidebar) {
+        // Mostrar/ocultar o menu lateral ao clicar no botão
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
         });
 
+        // Fechar o menu lateral ao clicar fora dele
         document.addEventListener('click', (event) => {
             if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
-                sidebar.classList.remove("active");
+                sidebar.classList.remove('active');
             }
         });
     }
