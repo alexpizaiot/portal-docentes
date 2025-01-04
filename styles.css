@@ -54,3 +54,33 @@ button:hover {
     transform: translateY(0);
   }
 }
+
+/* Estilização do Carrossel */
+.carousel {
+  max-width: 600px; /* Define a largura máxima do carrossel */
+  margin: 20px auto; /* Centraliza o carrossel e adiciona espaço superior */
+}
+
+.carousel-inner {
+  border-radius: 10px; /* Bordas arredondadas para o carrossel */
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para simular um quadro */
+}
+
+.carousel img {
+  width: 100%; /* Ajusta a imagem à largura do carrossel */
+  height: 300px; /* Define uma altura fixa para o carrossel */
+  object-fit: cover; /* Garante que as imagens sejam cortadas proporcionalmente para se ajustar */
+  border-radius: 10px; /* Adiciona bordas arredondadas */
+}
+
+/* Ajustes Responsivos */
+@media (max-width: 767.98px) {
+  .carousel {
+    max-width: 100%; /* Usa 100% da largura em telas menores */
+  }
+
+  .carousel img {
+    height: 200px; /* Reduz a altura das imagens em dispositivos móveis */
+  }
+}
