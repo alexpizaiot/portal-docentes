@@ -1,15 +1,29 @@
 import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-document.addEventListener("DOMContentLoaded", () => {
+ document.addEventListener("DOMContentLoaded", () => {
+    // Inicializar Firebase
+         try{
+              const app = initializeApp({
+                apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
+                authDomain: "portaldocentes-fb404.firebaseapp.com",
+                projectId: "portaldocentes-fb404",
+                storageBucket: "portaldocentes-fb404.firebasestorage.app",
+                messagingSenderId: "837457806876",
+                appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
+              });
+            console.log("dashboard.js: Firebase inicializado com sucesso.")
+        } catch (error){
+           console.error("dashboard.js: Erro ao inicializar o Firebase:", error);
+         }
     const logoutBtn = document.getElementById('logoutBtn');
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             const auth = getAuth();
-           
-               console.log("dashboard.js: Iniciando o signout")
-                signOut(auth).then(()=> {
-                    console.log("dashboard.js: signout realizado com sucesso");
-                     window.location.href = 'index.html';
+           try {
+             console.log("dashboard.js: Iniciando o signout")
+                signOut(auth).then(()=>{
+                    console.log("dashboard.js: signout realizado com sucesso")
+                    window.location.href = 'index.html';
                 }).catch((error) => {
                      console.error("dashboard.js: Erro ao sair:", error);
                   alert('dashboard.js: Erro ao sair')
