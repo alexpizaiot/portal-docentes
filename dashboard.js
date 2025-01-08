@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -18,103 +18,71 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Botão de logout
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            try {
-                console.log("dashboard.js: Iniciando o signout");
-                signOut(auth)
-                    .then(() => {
-                        console.log("dashboard.js: Signout realizado com sucesso");
-                        window.location.href = 'index.html'; // Redirecionar para a página inicial
-                    })
-                    .catch((error) => {
-                        console.error("dashboard.js: Erro ao sair:", error);
-                        alert('Erro ao sair. Consulte o console para mais detalhes.');
-                    });
-            } catch (error) {
-                console.error("dashboard.js: Erro ao sair:", error);
-                alert('Erro ao sair. Consulte o console para mais detalhes.');
-            }
-        });
-    }
+    console.log("dashboard.js: DOM carregado.");
 
-    // Verificar nível de acesso e exibir menu "Gestor"
+    // Verificar autenticação do usuário
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const userEmail = user.email;
-            console.log("Usuário autenticado:", userEmail);
+            console.log("dashboard.js: Usuário autenticado:", user.email);
 
             try {
-                const docRef = doc(db, "autorizados", userEmail);
+                // Obter dados do Firestore
+                const docRef = doc(db, "autorizados", user.email);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
-                    console.log("Dados do usuário no Firestore:", userData);
+                    console.log("dashboard.js: Dados do Firestore:", userData);
 
-                    // Verificar nível de acesso
+                    // Exibir o menu "Gestor" se o nível for gestor
                     if (userData.nivel === "gestor") {
-                        console.log("Nível de acesso: Gestor");
-                        const gestorMenuItem = document.createElement("li");
-                        gestorMenuItem.classList.add("nav-item");
-                        gestorMenuItem.innerHTML = `
-                            <a class="nav-link" href="#gestor-form">
-                                <i class="fas fa-user-cog"></i> Administrador
-                            </a>
-                        `;
-                        document.querySelector(".nav").appendChild(gestorMenuItem);
-
-                        // Exibir formulário do gestor
-                        const gestorForm = document.getElementById("gestor-form");
-                        if (gestorForm) {
-                            gestorForm.style.display = "block";
-                        }
+                        console.log("dashboard.js: Usuário é um gestor.");
+                        mostrarMenuGestor();
                     } else {
-                        console.log("Nível de acesso: Não é gestor");
+                        console.log("dashboard.js: Usuário não é gestor.");
                     }
                 } else {
-                    console.error("Documento não encontrado no Firestore para o e-mail:", userEmail);
+                    console.error("dashboard.js: Documento não encontrado no Firestore para o e-mail:", user.email);
+                    alert("Você não está autorizado. Entre em contato com o administrador.");
+                    signOut(auth);
                 }
             } catch (error) {
-                console.error("Erro ao obter dados do Firestore:", error.message);
+                console.error("dashboard.js: Erro ao acessar o Firestore:", error.message);
+                alert("Erro ao acessar os dados. Consulte o suporte.");
+                signOut(auth);
             }
         } else {
-            console.log("Nenhum usuário autenticado.");
+            console.log("dashboard.js: Nenhum usuário autenticado. Redirecionando para login.");
             window.location.href = 'index.html'; // Redirecionar para a página de login
         }
     });
 
-    // Gravar dados no Firestore
-    const formGravarDados = document.getElementById("formGravarDados");
-    if (formGravarDados) {
-        formGravarDados.addEventListener("submit", async (e) => {
+    // Função para exibir o menu "Gestor"
+    function mostrarMenuGestor() {
+        const gestorMenuItem = document.createElement("li");
+        gestorMenuItem.classList.add("nav-item");
+        gestorMenuItem.innerHTML = `
+            <a class="nav-link" href="#gestor-form">
+                <i class="fas fa-user-cog"></i> Administrador
+            </a>
+        `;
+        document.querySelector(".nav").appendChild(gestorMenuItem);
+    }
+
+    // Botão de logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-
-            // Obter valores do formulário
-            const emailInput = document.getElementById("emailInput").value;
-            const nivelInput = document.getElementById("nivelInput").value;
-
-            console.log("Tentando gravar no Firestore com os seguintes dados:");
-            console.log("ID do Documento (email):", emailInput);
-            console.log("Dados:", { email: emailInput, nivel: nivelInput });
-
-            try {
-                const userRef = doc(db, "autorizados", emailInput);
-                await setDoc(userRef, {
-                    email: emailInput,
-                    nivel: nivelInput,
+            console.log("dashboard.js: Usuário clicou em logout.");
+            signOut(auth)
+                .then(() => {
+                    console.log("dashboard.js: Logout realizado com sucesso.");
+                    window.location.href = 'index.html'; // Redirecionar para login
+                })
+                .catch((error) => {
+                    console.error("dashboard.js: Erro ao realizar logout:", error.message);
                 });
-
-                console.log("Gravação no Firestore realizada com sucesso!");
-                alert("Dados gravados com sucesso no Firestore!");
-                formGravarDados.reset(); // Limpar o formulário
-            } catch (error) {
-                console.error("Erro ao gravar no Firestore:", error.message);
-                alert("Erro ao gravar no Firestore. Consulte o console.");
-            }
         });
     }
 });
