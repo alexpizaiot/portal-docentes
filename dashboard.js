@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -57,15 +57,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (addUserForm) {
             addUserForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
-                const email = emailInput.value.trim();
-                const nivel = levelSelect.value;
+                const email = emailInput.value.trim(); // Email fornecido no formulário
+                const nivel = levelSelect.value; // Nível selecionado no formulário
 
                 try {
-                    await addDoc(collection(db, "autorizados"), {
+                    console.log("Tentando gravar os dados no Firestore:", { email, nivel });
+
+                    // Cria ou atualiza o documento com o email como ID
+                    const userRef = doc(db, "autorizados", email);
+                    await setDoc(userRef, {
                         email: email,
                         nivel: nivel,
                     });
-                    alert("Usuário adicionado com sucesso!");
+
+                    alert("Usuário adicionado ou atualizado com sucesso!");
                     addUserForm.reset();
                 } catch (error) {
                     console.error("Erro ao gravar no Firestore:", error);
