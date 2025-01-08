@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -18,51 +18,15 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const logoutBtn = document.getElementById('logoutBtn');
-    const gestorMenuItem = document.getElementById('gestorMenuItem');
-    const cadastroSection = document.getElementById('cadastroSection');
-    const usuariosCadastradosSection = document.getElementById('usuariosCadastradosSection');
-    const addUserForm = document.getElementById('addUserForm');
-    const emailInput = document.getElementById('emailInput');
-    const levelSelect = document.getElementById('levelSelect');
-    const usuariosLista = document.getElementById('usuariosLista');
-
-    // Verificar autenticação do usuário
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
-
-        const userEmail = user.email;
-        const querySnapshot = await getDocs(collection(db, "autorizados"));
-        const userData = querySnapshot.docs.find(doc => doc.data().email === userEmail)?.data();
-
-        if (!userData) {
-            alert("Usuário não autorizado!");
-            await signOut(auth);
-            window.location.href = 'index.html';
-            return;
-        }
-
-        const userLevel = userData.nivel;
-
-        if (userLevel === "gestor") {
-            gestorMenuItem.classList.remove('d-none');
-        } else {
-            gestorMenuItem.classList.add('d-none');
-        }
-
-        gestorMenuItem.addEventListener('click', () => {
-            cadastroSection.classList.remove('d-none');
-            usuariosCadastradosSection.classList.remove('d-none');
-            carregarUsuarios();
-        });
-    });
+    const gestorMenuItem = document.getElementById("gestorMenuItem");
+    const gestorSection = document.getElementById("gestorSection");
+    const addUserForm = document.getElementById("addUserForm");
+    const emailInput = document.getElementById("emailInput");
+    const levelSelect = document.getElementById("levelSelect");
+    const userList = document.getElementById("userList");
 
     // Logout
-    logoutBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
         try {
             await signOut(auth);
             window.location.href = 'index.html';
@@ -71,78 +35,80 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // Adicionar usuário
-    addUserForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = emailInput.value.trim();
-        const nivel = levelSelect.value;
+    // Mostrar opções do gestor
+    const userLevel = new URLSearchParams(window.location.search).get("nivel");
+    if (userLevel === "gestor") {
+        gestorMenuItem.classList.remove("d-none");
+        gestorMenuItem.addEventListener("click", () => {
+            gestorSection.classList.remove("d-none");
+            loadUsers();
+        });
 
-        if (!email) {
-            alert("E-mail é obrigatório!");
-            return;
-        }
+        // Adicionar usuário
+        addUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const nivel = levelSelect.value;
 
-        try {
-            await addDoc(collection(db, "autorizados"), { email, nivel });
-            alert("Usuário adicionado com sucesso!");
-            emailInput.value = "";
-            levelSelect.value = "Docente";
-            carregarUsuarios();
-        } catch (error) {
-            console.error("Erro ao adicionar usuário:", error);
-            alert("Erro ao adicionar usuário. Consulte o console.");
-        }
-    });
+            try {
+                await addDoc(collection(db, "autorizados"), { email, nivel });
+                alert("Usuário adicionado com sucesso!");
+                addUserForm.reset();
+                loadUsers();
+            } catch (error) {
+                console.error("Erro ao adicionar usuário:", error);
+            }
+        });
+    }
 
-    // Carregar lista de usuários
-    async function carregarUsuarios() {
-        usuariosLista.innerHTML = "";
+    // Carregar usuários
+    async function loadUsers() {
+        userList.innerHTML = "";
         const querySnapshot = await getDocs(collection(db, "autorizados"));
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const userItem = document.createElement("div");
-            userItem.className = "usuario-item";
-
-            userItem.innerHTML = `
-                <p>E-mail: ${data.email} | Nível: ${data.nivel}</p>
-                <button class="btn btn-warning btn-sm editar-btn">Editar</button>
-                <button class="btn btn-danger btn-sm excluir-btn">Excluir</button>
+            const user = doc.data();
+            const div = document.createElement("div");
+            div.className = "d-flex justify-content-between align-items-center mb-2";
+            div.innerHTML = `
+                <span>E-mail: ${user.email} | Nível: ${user.nivel}</span>
+                <div>
+                    <button class="btn btn-sm btn-warning edit-btn" data-id="${doc.id}">Editar</button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Excluir</button>
+                </div>
             `;
+            userList.appendChild(div);
+        });
 
-            // Editar usuário
-            const editarBtn = userItem.querySelector(".editar-btn");
-            editarBtn.addEventListener("click", async () => {
-                const novoNivel = prompt("Digite o novo nível (gestor/docente):", data.nivel);
-                if (novoNivel && (novoNivel === "gestor" || novoNivel === "docente")) {
+        // Adicionar eventos de edição e exclusão
+        document.querySelectorAll(".edit-btn").forEach((btn) =>
+            btn.addEventListener("click", async (e) => {
+                const id = e.target.dataset.id;
+                const newNivel = prompt("Digite o novo nível (docente ou gestor):");
+                if (newNivel) {
                     try {
-                        await updateDoc(doc(db, "autorizados", doc.id), { nivel: novoNivel });
+                        await updateDoc(doc(db, "autorizados", id), { nivel: newNivel });
                         alert("Nível atualizado com sucesso!");
-                        carregarUsuarios();
+                        loadUsers();
                     } catch (error) {
-                        console.error("Erro ao atualizar nível:", error);
-                        alert("Erro ao atualizar nível. Consulte o console.");
+                        console.error("Erro ao editar usuário:", error);
                     }
-                } else {
-                    alert("Nível inválido!");
                 }
-            });
+            })
+        );
 
-            // Excluir usuário
-            const excluirBtn = userItem.querySelector(".excluir-btn");
-            excluirBtn.addEventListener("click", async () => {
-                if (confirm("Deseja realmente excluir este usuário?")) {
+        document.querySelectorAll(".delete-btn").forEach((btn) =>
+            btn.addEventListener("click", async (e) => {
+                const id = e.target.dataset.id;
+                if (confirm("Tem certeza que deseja excluir este usuário?")) {
                     try {
-                        await deleteDoc(doc(db, "autorizados", doc.id));
+                        await deleteDoc(doc(db, "autorizados", id));
                         alert("Usuário excluído com sucesso!");
-                        carregarUsuarios();
+                        loadUsers();
                     } catch (error) {
                         console.error("Erro ao excluir usuário:", error);
-                        alert("Erro ao excluir usuário. Consulte o console.");
                     }
                 }
-            });
-
-            usuariosLista.appendChild(userItem);
-        });
+            })
+        );
     }
 });
