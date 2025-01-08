@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("dashboard.js: Usuário autenticado:", user.email);
 
             try {
-                // Obter dados do Firestore
+                // Verificar dados do Firestore
                 const docRef = doc(db, "autorizados", user.email);
                 const docSnap = await getDoc(docRef);
 
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const userData = docSnap.data();
                     console.log("dashboard.js: Dados do Firestore:", userData);
 
-                    // Exibir o menu "Gestor" se o nível for gestor
+                    // Exibir menu Gestor se for nível "gestor"
                     if (userData.nivel === "gestor") {
                         console.log("dashboard.js: Usuário é um gestor.");
                         mostrarMenuGestor();
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Função para exibir o menu "Gestor"
+    // Função para exibir o menu Gestor
     function mostrarMenuGestor() {
         const gestorMenuItem = document.createElement("li");
         gestorMenuItem.classList.add("nav-item");
@@ -67,6 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>
         `;
         document.querySelector(".nav").appendChild(gestorMenuItem);
+
+        // Exibir formulário de gestão
+        const gestorForm = document.getElementById("gestor-form");
+        if (gestorForm) {
+            gestorForm.style.display = "block";
+        }
     }
 
     // Botão de logout
@@ -83,6 +89,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 .catch((error) => {
                     console.error("dashboard.js: Erro ao realizar logout:", error.message);
                 });
+        });
+    }
+
+    // Função para gravar dados no Firestore
+    const formGravarDados = document.getElementById("formGravarDados");
+    if (formGravarDados) {
+        formGravarDados.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Obter valores do formulário
+            const emailInput = document.getElementById("emailInput").value;
+            const nivelInput = document.getElementById("nivelInput").value;
+
+            console.log("dashboard.js: Tentando gravar no Firestore com os seguintes dados:");
+            console.log("Email:", emailInput, "Nível:", nivelInput);
+
+            try {
+                const userRef = doc(db, "autorizados", emailInput); // Usando o e-mail como ID
+                await setDoc(userRef, { email: emailInput, nivel: nivelInput });
+
+                console.log("dashboard.js: Dados gravados com sucesso no Firestore.");
+                alert("Dados gravados com sucesso!");
+                formGravarDados.reset(); // Limpar o formulário
+            } catch (error) {
+                console.error("dashboard.js: Erro ao gravar no Firestore:", error.message);
+                alert("Erro ao gravar dados. Consulte o console.");
+            }
         });
     }
 });
