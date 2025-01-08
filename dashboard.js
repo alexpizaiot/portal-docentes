@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -17,104 +17,97 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("dashboard.js: DOM carregado.");
-
-    // Verificar autenticação do usuário
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            console.log("dashboard.js: Usuário autenticado:", user.email);
-
-            try {
-                // Verificar dados do Firestore
-                const docRef = doc(db, "autorizados", user.email);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    console.log("dashboard.js: Dados do Firestore:", userData);
-
-                    // Exibir menu Gestor se for nível "gestor"
-                    if (userData.nivel === "gestor") {
-                        console.log("dashboard.js: Usuário é um gestor.");
-                        mostrarMenuGestor();
-                    } else {
-                        console.log("dashboard.js: Usuário não é gestor.");
-                    }
-                } else {
-                    console.error("dashboard.js: Documento não encontrado no Firestore para o e-mail:", user.email);
-                    alert("Você não está autorizado. Entre em contato com o administrador.");
-                    signOut(auth);
-                }
-            } catch (error) {
-                console.error("dashboard.js: Erro ao acessar o Firestore:", error.message);
-                alert("Erro ao acessar os dados. Consulte o suporte.");
-                signOut(auth);
-            }
-        } else {
-            console.log("dashboard.js: Nenhum usuário autenticado. Redirecionando para login.");
-            window.location.href = 'index.html'; // Redirecionar para a página de login
-        }
-    });
-
-    // Função para exibir o menu Gestor
-    function mostrarMenuGestor() {
-        const gestorMenuItem = document.createElement("li");
-        gestorMenuItem.classList.add("nav-item");
-        gestorMenuItem.innerHTML = `
-            <a class="nav-link" href="#gestor-form">
-                <i class="fas fa-user-cog"></i> Administrador
-            </a>
-        `;
-        document.querySelector(".nav").appendChild(gestorMenuItem);
-
-        // Exibir formulário de gestão
-        const gestorForm = document.getElementById("gestor-form");
-        if (gestorForm) {
-            gestorForm.style.display = "block";
-        }
-    }
-
+document.addEventListener("DOMContentLoaded", async () => {
     // Botão de logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            console.log("dashboard.js: Usuário clicou em logout.");
-            signOut(auth)
-                .then(() => {
-                    console.log("dashboard.js: Logout realizado com sucesso.");
-                    window.location.href = 'index.html'; // Redirecionar para login
-                })
-                .catch((error) => {
-                    console.error("dashboard.js: Erro ao realizar logout:", error.message);
-                });
+            try {
+                console.log("dashboard.js: Iniciando o signout");
+                await signOut(auth);
+                console.log("dashboard.js: Signout realizado com sucesso");
+                window.location.href = 'index.html'; // Redirecionar para a página inicial
+            } catch (error) {
+                console.error("dashboard.js: Erro ao sair:", error);
+                alert('Erro ao sair. Consulte o console para mais detalhes.');
+            }
         });
     }
 
-    // Função para gravar dados no Firestore
-    const formGravarDados = document.getElementById("formGravarDados");
-    if (formGravarDados) {
-        formGravarDados.addEventListener("submit", async (e) => {
+    // Verificar o nível de acesso do usuário autenticado
+    const userLevel = new URLSearchParams(window.location.search).get("nivel");
+    const gestorMenuItem = document.getElementById("gestorMenuItem");
+    const gestorSection = document.getElementById("gestorSection");
+
+    if (userLevel === "gestor") {
+        // Exibir o menu "Gestor" para usuários do nível gestor
+        if (gestorMenuItem) gestorMenuItem.classList.remove("d-none");
+
+        // Exibir a seção de cadastro ao clicar no menu "Gestor"
+        gestorMenuItem.addEventListener("click", () => {
+            if (gestorSection) gestorSection.classList.remove("d-none");
+        });
+
+        // Lógica para gravar os dados no Firestore
+        const addUserForm = document.getElementById("addUserForm");
+        const emailInput = document.getElementById("emailInput");
+        const levelSelect = document.getElementById("levelSelect");
+
+        if (addUserForm) {
+            addUserForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                const nivel = levelSelect.value;
+
+                try {
+                    await addDoc(collection(db, "autorizados"), {
+                        email: email,
+                        nivel: nivel,
+                    });
+                    alert("Usuário adicionado com sucesso!");
+                    addUserForm.reset();
+                } catch (error) {
+                    console.error("Erro ao gravar no Firestore:", error);
+                    alert("Erro ao adicionar usuário. Consulte o console.");
+                }
+            });
+        }
+    }
+
+    // Navegação suave para links
+    const navLinks = document.querySelectorAll(".nav-link");
+    navLinks.forEach(link => {
+        link.addEventListener("click", (e) => {
             e.preventDefault();
+            const href = link.getAttribute("href");
+            if (href !== "#") {
+                if (href === "#controle-evasao") {
+                    window.open("https://forms.office.com/r/fBNbhiYfsb", "_blank");
+                } else {
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: "smooth" });
+                    }
+                }
+            }
+        });
+    });
 
-            // Obter valores do formulário
-            const emailInput = document.getElementById("emailInput").value;
-            const nivelInput = document.getElementById("nivelInput").value;
+    // Controle do Menu Lateral Responsivo
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
 
-            console.log("dashboard.js: Tentando gravar no Firestore com os seguintes dados:");
-            console.log("Email:", emailInput, "Nível:", nivelInput);
+    if (menuButton && sidebar) {
+        // Mostrar/ocultar o menu lateral ao clicar no botão
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
 
-            try {
-                const userRef = doc(db, "autorizados", emailInput); // Usando o e-mail como ID
-                await setDoc(userRef, { email: emailInput, nivel: nivelInput });
-
-                console.log("dashboard.js: Dados gravados com sucesso no Firestore.");
-                alert("Dados gravados com sucesso!");
-                formGravarDados.reset(); // Limpar o formulário
-            } catch (error) {
-                console.error("dashboard.js: Erro ao gravar no Firestore:", error.message);
-                alert("Erro ao gravar dados. Consulte o console.");
+        // Fechar o menu lateral ao clicar fora dele
+        document.addEventListener('click', (event) => {
+            if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
+                sidebar.classList.remove('active');
             }
         });
     }
