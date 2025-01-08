@@ -45,29 +45,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Verificar se o e-mail está autorizado no Firestore
                 const docRef = doc(db, "autorizados", userEmail);
-                const docSnap = await getDoc(docRef);
+                try {
+                    const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    console.log("Usuário autorizado com nível:", userData.nivel);
+                    if (docSnap.exists()) {
+                        console.log("Documento encontrado no Firestore:", docSnap.data());
+                        const userData = docSnap.data();
+                        console.log("Nível de acesso encontrado:", userData.nivel);
 
-                    // Redirecionar para a página principal
-                    status.innerText = "Acesso concedido. Bem-vindo!";
-                    if (userData.nivel === "gestor") {
-                        window.location.href = 'dashboard.html?nivel=gestor';
-                    } else if (userData.nivel === "docente") {
-                        window.location.href = 'dashboard.html?nivel=docente';
+                        // Redirecionar com base no nível de acesso
+                        status.innerText = "Acesso concedido. Bem-vindo!";
+                        if (userData.nivel === "gestor") {
+                            window.location.href = 'dashboard.html?nivel=gestor';
+                        } else if (userData.nivel === "docente") {
+                            window.location.href = 'dashboard.html?nivel=docente';
+                        } else {
+                            status.innerText = "Nível de acesso não configurado.";
+                            await signOut(auth);
+                        }
                     } else {
-                        status.innerText = "Seu nível de acesso não está configurado.";
+                        console.error("Nenhum documento encontrado para o e-mail:", userEmail);
+                        status.innerText = "Seu e-mail não está autorizado.";
                         await signOut(auth);
                     }
-                } else {
-                    console.log("Usuário não autorizado:", userEmail);
-                    status.innerText = "Seu e-mail não está autorizado.";
-                    await signOut(auth);
+                } catch (error) {
+                    console.error("Erro ao acessar o Firestore:", error.message);
+                    status.innerText = "Erro ao verificar autorização. Tente novamente.";
                 }
             } catch (error) {
-                console.error("Erro ao fazer login:", error);
+                console.error("Erro ao fazer login:", error.message);
                 status.innerText = "Erro ao fazer login. Tente novamente.";
             } finally {
                 loading.style.display = "none"; // Ocultar mensagem de carregamento
