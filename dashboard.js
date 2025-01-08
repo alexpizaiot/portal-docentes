@@ -4,19 +4,18 @@ import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/fireba
 
 // Configuração do Firebase
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE_BUCKET",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
+    apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
+    authDomain: "portaldocentes-fb404.firebaseapp.com",
+    projectId: "portaldocentes-fb404",
+    storageBucket: "portaldocentes-fb404.firebasestorage.app",
+    messagingSenderId: "837457806876",
+    appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
 };
 
 // Inicializar o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-console.log("dashboard.js: db:", db);
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Botão de logout
@@ -58,26 +57,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (addUserForm) {
             addUserForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
-                console.log("dashboard.js: Formulário submetido");
                 const email = emailInput.value.trim();
                 const nivel = levelSelect.value;
-                console.log("dashboard.js: Email:", email, "Nível:", nivel);
 
-                 try {
-                    console.log("dashboard.js: Objeto a ser enviado:", { email: email, nivel: nivel });
-                    console.log("dashboard.js: Tentando adicionar ao Firestore");
-                     await addDoc(collection(db, "autorizados"), {
-                         email: email,
-                         nivel: nivel,
-                     });
-                     console.log("dashboard.js: Usuário adicionado com sucesso!");
-                     alert("Usuário adicionado com sucesso!");
-                     addUserForm.reset();
-                 } catch (error) {
-                     console.error("dashboard.js: Erro ao gravar no Firestore:", error);
-                     console.log("dashboard.js: Erro no catch:", error);
-                     alert("Erro ao adicionar usuário. Consulte o console.");
-                 }
+                try {
+                    await addDoc(collection(db, "autorizados"), {
+                        email: email,
+                        nivel: nivel,
+                    });
+                    alert("Usuário adicionado com sucesso!");
+                    addUserForm.reset();
+                } catch (error) {
+                    console.error("Erro ao gravar no Firestore:", error);
+                    alert("Erro ao adicionar usuário. Consulte o console.");
+                }
             });
         }
     }
