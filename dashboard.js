@@ -1,5 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -14,29 +15,64 @@ const firebaseConfig = {
 // Inicializar o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // Botão de logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             try {
                 console.log("dashboard.js: Iniciando o signout");
-                signOut(auth)
-                    .then(() => {
-                        console.log("dashboard.js: Signout realizado com sucesso");
-                        window.location.href = 'index.html'; // Redirecionar para a página inicial
-                    })
-                    .catch((error) => {
-                        console.error("dashboard.js: Erro ao sair:", error);
-                        alert('Erro ao sair. Consulte o console para mais detalhes.');
-                    });
+                await signOut(auth);
+                console.log("dashboard.js: Signout realizado com sucesso");
+                window.location.href = 'index.html'; // Redirecionar para a página inicial
             } catch (error) {
                 console.error("dashboard.js: Erro ao sair:", error);
                 alert('Erro ao sair. Consulte o console para mais detalhes.');
             }
         });
+    }
+
+    // Verificar o nível de acesso do usuário autenticado
+    const userLevel = new URLSearchParams(window.location.search).get("nivel");
+    const gestorMenuItem = document.getElementById("gestorMenuItem");
+    const gestorSection = document.getElementById("gestorSection");
+
+    if (userLevel === "gestor") {
+        // Exibir o menu "Gestor" para usuários do nível gestor
+        if (gestorMenuItem) gestorMenuItem.classList.remove("d-none");
+
+        // Exibir a seção de cadastro ao clicar no menu "Gestor"
+        gestorMenuItem.addEventListener("click", () => {
+            if (gestorSection) gestorSection.classList.remove("d-none");
+        });
+
+        // Lógica para gravar os dados no Firestore
+        const addUserForm = document.getElementById("addUserForm");
+        const emailInput = document.getElementById("emailInput");
+        const levelSelect = document.getElementById("levelSelect");
+
+        if (addUserForm) {
+            addUserForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                const nivel = levelSelect.value;
+
+                try {
+                    await addDoc(collection(db, "autorizados"), {
+                        email: email,
+                        nivel: nivel,
+                    });
+                    alert("Usuário adicionado com sucesso!");
+                    addUserForm.reset();
+                } catch (error) {
+                    console.error("Erro ao gravar no Firestore:", error);
+                    alert("Erro ao adicionar usuário. Consulte o console.");
+                }
+            });
+        }
     }
 
     // Navegação suave para links
