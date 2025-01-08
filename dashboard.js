@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const emailInput = document.getElementById("emailInput");
     const levelSelect = document.getElementById("levelSelect");
     const userList = document.getElementById("userList");
+    const menuButton = document.getElementById("menuButton");
+    const sidebar = document.getElementById("sidebar");
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -123,4 +125,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             })
         );
     }
+
+    // Controle do menu hambúrguer
+    menuButton.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
+            sidebar.classList.remove("active");
+        }
+    });
 });
