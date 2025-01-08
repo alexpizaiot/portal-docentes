@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             loadUsers();
         });
 
-        // Alternar entre abas
+        // Adicionar evento para alternar entre abas
         document.getElementById("cadastro-tab").addEventListener("click", () => {
             document.getElementById("cadastro").classList.add("show", "active");
             document.getElementById("usuarios").classList.remove("show", "active");
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Carregar usuários
+    // Função para carregar usuários cadastrados
     async function loadUsers() {
         userList.innerHTML = "";
         const querySnapshot = await getDocs(collection(db, "autorizados"));
