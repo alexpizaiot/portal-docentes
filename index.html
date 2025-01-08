@@ -8,9 +8,12 @@
 </head>
 <body>
   <div class="container">
-    <h1>Login com Google</h1>
-    <button id="loginBtn">Entrar com Google</button>
-    <p id="status"></p>
+    <section aria-labelledby="login-title">
+      <h1 id="login-title">Login com Google</h1>
+      <button id="loginBtn" aria-label="Entrar com Google">Entrar com Google</button>
+      <p id="status"></p>
+      <p id="loading" style="display: none;">Processando login, por favor aguarde...</p>
+    </section>
   </div>
   <script type="module" src="index.js"></script>
 </body>
