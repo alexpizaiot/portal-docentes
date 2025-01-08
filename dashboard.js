@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, doc, setDoc, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -41,6 +41,52 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Verificar nível de acesso e exibir menu "Gestor"
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userEmail = user.email;
+            console.log("Usuário autenticado:", userEmail);
+
+            try {
+                const docRef = doc(db, "autorizados", userEmail);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    console.log("Dados do usuário no Firestore:", userData);
+
+                    // Verificar nível de acesso
+                    if (userData.nivel === "gestor") {
+                        console.log("Nível de acesso: Gestor");
+                        const gestorMenuItem = document.createElement("li");
+                        gestorMenuItem.classList.add("nav-item");
+                        gestorMenuItem.innerHTML = `
+                            <a class="nav-link" href="#gestor-form">
+                                <i class="fas fa-user-cog"></i> Administrador
+                            </a>
+                        `;
+                        document.querySelector(".nav").appendChild(gestorMenuItem);
+
+                        // Exibir formulário do gestor
+                        const gestorForm = document.getElementById("gestor-form");
+                        if (gestorForm) {
+                            gestorForm.style.display = "block";
+                        }
+                    } else {
+                        console.log("Nível de acesso: Não é gestor");
+                    }
+                } else {
+                    console.error("Documento não encontrado no Firestore para o e-mail:", userEmail);
+                }
+            } catch (error) {
+                console.error("Erro ao obter dados do Firestore:", error.message);
+            }
+        } else {
+            console.log("Nenhum usuário autenticado.");
+            window.location.href = 'index.html'; // Redirecionar para a página de login
+        }
+    });
+
     // Gravar dados no Firestore
     const formGravarDados = document.getElementById("formGravarDados");
     if (formGravarDados) {
@@ -56,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Dados:", { email: emailInput, nivel: nivelInput });
 
             try {
-                // Configurar o documento com o email como ID
                 const userRef = doc(db, "autorizados", emailInput);
                 await setDoc(userRef, {
                     email: emailInput,
@@ -69,43 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.error("Erro ao gravar no Firestore:", error.message);
                 alert("Erro ao gravar no Firestore. Consulte o console.");
-            }
-        });
-    }
-
-    // Navegação suave para links
-    const navLinks = document.querySelectorAll(".nav-link");
-    navLinks.forEach(link => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const href = link.getAttribute("href");
-            if (href !== "#") {
-                if (href === "#controle-evasao") {
-                    window.open("https://forms.office.com/r/fBNbhiYfsb", "_blank");
-                } else {
-                    const targetElement = document.querySelector(href);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: "smooth" });
-                    }
-                }
-            }
-        });
-    });
-
-    // Controle do Menu Lateral Responsivo
-    const menuButton = document.getElementById('menuButton');
-    const sidebar = document.getElementById('sidebar');
-
-    if (menuButton && sidebar) {
-        // Mostrar/ocultar o menu lateral ao clicar no botão
-        menuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        // Fechar o menu lateral ao clicar fora dele
-        document.addEventListener('click', (event) => {
-            if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
-                sidebar.classList.remove('active');
             }
         });
     }
