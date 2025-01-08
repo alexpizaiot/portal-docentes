@@ -1,7 +1,7 @@
 // Importação das funções do Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -44,33 +44,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Usuário autenticado:", userEmail);
 
                 // Verificar se o e-mail está autorizado no Firestore
-                const docRef = doc(db, "autorizados", userEmail);
-                try {
-                    const docSnap = await getDoc(docRef);
+                const q = query(collection(db, "autorizados"), where("email", "==", userEmail));
+                const querySnapshot = await getDocs(q);
 
-                    if (docSnap.exists()) {
-                        console.log("Documento encontrado no Firestore:", docSnap.data());
-                        const userData = docSnap.data();
-                        console.log("Nível de acesso encontrado:", userData.nivel);
+                if (!querySnapshot.empty) {
+                    console.log("Documento(s) encontrado(s) no Firestore:", querySnapshot.docs.map(doc => doc.data()));
+                    const userData = querySnapshot.docs[0].data(); // Primeiro documento encontrado
+                    console.log("Nível de acesso encontrado:", userData.nivel);
 
-                        // Redirecionar com base no nível de acesso
-                        status.innerText = "Acesso concedido. Bem-vindo!";
-                        if (userData.nivel === "gestor") {
-                            window.location.href = 'dashboard.html?nivel=gestor';
-                        } else if (userData.nivel === "docente") {
-                            window.location.href = 'dashboard.html?nivel=docente';
-                        } else {
-                            status.innerText = "Nível de acesso não configurado.";
-                            await signOut(auth);
-                        }
+                    // Redirecionar com base no nível de acesso
+                    status.innerText = "Acesso concedido. Bem-vindo!";
+                    if (userData.nivel === "gestor") {
+                        window.location.href = 'dashboard.html?nivel=gestor';
+                    } else if (userData.nivel === "docente") {
+                        window.location.href = 'dashboard.html?nivel=docente';
                     } else {
-                        console.error("Nenhum documento encontrado para o e-mail:", userEmail);
-                        status.innerText = "Seu e-mail não está autorizado.";
+                        status.innerText = "Nível de acesso não configurado.";
                         await signOut(auth);
                     }
-                } catch (error) {
-                    console.error("Erro ao acessar o Firestore:", error.message);
-                    status.innerText = "Erro ao verificar autorização. Tente novamente.";
+                } else {
+                    console.error("Nenhum documento encontrado para o e-mail:", userEmail);
+                    status.innerText = "Seu e-mail não está autorizado.";
+                    await signOut(auth);
                 }
             } catch (error) {
                 console.error("Erro ao fazer login:", error.message);
