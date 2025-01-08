@@ -57,18 +57,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (addUserForm) {
             addUserForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
+                console.log("dashboard.js: Formulário submetido");
                 const email = emailInput.value.trim();
                 const nivel = levelSelect.value;
+                console.log("dashboard.js: Email:", email, "Nível:", nivel);
 
                 try {
+                    console.log("dashboard.js: Tentando adicionar ao Firestore");
                     await addDoc(collection(db, "autorizados"), {
                         email: email,
                         nivel: nivel,
                     });
+                    console.log("dashboard.js: Usuário adicionado com sucesso!");
                     alert("Usuário adicionado com sucesso!");
                     addUserForm.reset();
                 } catch (error) {
-                    console.error("Erro ao gravar no Firestore:", error);
+                    console.error("dashboard.js: Erro ao gravar no Firestore:", error);
                     alert("Erro ao adicionar usuário. Consulte o console.");
                 }
             });
