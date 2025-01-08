@@ -44,6 +44,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             loadUsers();
         });
 
+        // Alternar entre abas
+        document.getElementById("cadastro-tab").addEventListener("click", () => {
+            document.getElementById("cadastro").classList.add("show", "active");
+            document.getElementById("usuarios").classList.remove("show", "active");
+        });
+
+        document.getElementById("usuarios-tab").addEventListener("click", () => {
+            document.getElementById("usuarios").classList.add("show", "active");
+            document.getElementById("cadastro").classList.remove("show", "active");
+            loadUsers();
+        });
+
         // Adicionar usuário
         addUserForm.addEventListener("submit", async (e) => {
             e.preventDefault();
