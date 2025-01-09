@@ -63,12 +63,21 @@ function initializeDashboard(user) {
         document.getElementById("cadastro-tab").addEventListener("click", () => {
             document.getElementById("cadastro").classList.add("show", "active");
             document.getElementById("usuarios").classList.remove("show", "active");
+            document.getElementById("horarios").classList.remove("show", "active");
         });
 
         document.getElementById("usuarios-tab").addEventListener("click", () => {
             document.getElementById("usuarios").classList.add("show", "active");
             document.getElementById("cadastro").classList.remove("show", "active");
+            document.getElementById("horarios").classList.remove("show", "active");
             loadUsers();
+        });
+
+        document.getElementById("horarios-tab").addEventListener("click", () => {
+            document.getElementById("horarios").classList.add("show", "active");
+            document.getElementById("cadastro").classList.remove("show", "active");
+            document.getElementById("usuarios").classList.remove("show", "active");
+            loadHorarios();
         });
 
         // Adicionar usuário
@@ -137,6 +146,12 @@ function initializeDashboard(user) {
                 }
             })
         );
+    }
+
+    // Função para carregar dados de horários
+    async function loadHorarios() {
+        console.log("Carregando dados de horários...");
+        // Implementar lógica futura se necessário
     }
 
     // Controle do menu hambúrguer
