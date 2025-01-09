@@ -150,8 +150,64 @@ function initializeDashboard(user) {
 
     // Função para carregar dados de horários
     async function loadHorarios() {
-        console.log("Carregando dados de horários...");
-        // Implementar lógica futura se necessário
+        const tableBody = document.getElementById("schedule-table");
+        const monthSelect = document.getElementById("month");
+        tableBody.innerHTML = ""; // Limpar tabela existente
+
+        const month = monthSelect.value - 1; // Ajustar para índice do JavaScript (0-11)
+        const year = new Date().getFullYear();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const weekdays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const weekday = weekdays[date.getDay()];
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${date.toLocaleDateString("pt-BR")}</td>
+                <td>${weekday}</td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td class="total">0</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" class="form-check-input"></td>
+            `;
+
+            tableBody.appendChild(row);
+        }
+
+        updateMonthlyTotal();
+    }
+
+    // Função para atualizar o total mensal
+    function updateMonthlyTotal() {
+        const totalCells = document.querySelectorAll(".total");
+        const tableBody = document.getElementById("schedule-table");
+        const rows = tableBody.querySelectorAll("tr");
+        let monthlyTotal = 0;
+
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll("input[type='number']");
+            const totalCell = row.querySelector(".total");
+            let dailyTotal = 0;
+
+            inputs.forEach(input => {
+                dailyTotal += parseFloat(input.value) || 0;
+            });
+
+            totalCell.textContent = dailyTotal.toFixed(1);
+            monthlyTotal += dailyTotal;
+        });
+
+        document.getElementById("total-month").textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
+    }
+
+    // Função para salvar os dados (placeholder para integração futura)
+    async function saveData() {
+        alert("Funcionalidade de gravação será integrada futuramente.");
     }
 
     // Controle do menu hambúrguer
