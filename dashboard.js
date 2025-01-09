@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
@@ -17,7 +17,20 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+    // Verificar autenticação do usuário
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Redirecionar para a página de login se não autenticado
+            window.location.href = 'index.html';
+        } else {
+            console.log("Usuário autenticado:", user.email);
+            initializeDashboard(user);
+        }
+    });
+});
+
+function initializeDashboard(user) {
     const gestorMenuItem = document.getElementById("gestorMenuItem");
     const gestorSection = document.getElementById("gestorSection");
     const addUserForm = document.getElementById("addUserForm");
@@ -46,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             loadUsers();
         });
 
-        // Adicionar evento para alternar entre abas
+        // Alternar entre abas
         document.getElementById("cadastro-tab").addEventListener("click", () => {
             document.getElementById("cadastro").classList.add("show", "active");
             document.getElementById("usuarios").classList.remove("show", "active");
@@ -136,4 +149,4 @@ document.addEventListener("DOMContentLoaded", async () => {
             sidebar.classList.remove("active");
         }
     });
-});
+}
