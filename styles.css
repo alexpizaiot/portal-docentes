@@ -164,15 +164,17 @@ button:hover {
 
 /* Estilo para os dias de sábado */
 .saturday-row {
-  background-color: #ffecb3; /* Amarelo claro */
+  background-color: #FFD700; /* Amarelo escuro */
 }
 
 /* Estilo para os dias de domingo */
 .sunday-row {
-  background-color: #ffcccc; /* Vermelho claro */
+  background-color: #8B0000; /* Vermelho escuro */
+  color: white; /* Melhor contraste */
 }
 
 /* Estilo para feriados */
 .holiday-row {
-  background-color: #ff9999; /* Vermelho escuro */
+  background-color: #8B0000; /* Vermelho escuro */
+  color: white; /* Melhor contraste */
 }

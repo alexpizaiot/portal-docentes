@@ -7,7 +7,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
     authDomain: "portaldocentes-fb404.firebaseapp.com",
     projectId: "portaldocentes-fb404",
-    storageBucket: "portaldocentes-fb404.firebasestorage.app",
+    storageBucket: "portaldocentes-fb404.firebaseapp.com",
     messagingSenderId: "837457806876",
     appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
 };
@@ -221,11 +221,6 @@ function initializeDashboard(user) {
         });
 
         document.getElementById("total-month").textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-    }
-
-    // Função para salvar os dados (placeholder para integração futura)
-    async function saveData() {
-        alert("Funcionalidade de gravação será integrada futuramente.");
     }
 
     // Controle do menu hambúrguer
