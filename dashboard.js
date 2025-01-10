@@ -220,4 +220,8 @@ function initializeDashboard(user) {
             sidebar.classList.remove("active");
         }
     });
+
+    // Listener para o dropdown de mês
+    const monthSelect = document.getElementById("month");
+    monthSelect.addEventListener("change", loadHorarios);
 }
