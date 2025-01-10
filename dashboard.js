@@ -31,8 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initializeDashboard(user) {
-    const gestorMenuItem = document.getElementById("gestorMenuItem");
-    const gestorSection = document.getElementById("gestorSection");
+    const usuariosMenuItem = document.getElementById("usuariosMenuItem");
+    const usuariosSection = document.getElementById("usuariosSection");
+    const cadastroHorariosMenuItem = document.getElementById("cadastroHorariosMenuItem");
+    const horariosSection = document.getElementById("horariosSection");
     const addUserForm = document.getElementById("addUserForm");
     const emailInput = document.getElementById("emailInput");
     const levelSelect = document.getElementById("levelSelect");
@@ -50,34 +52,34 @@ function initializeDashboard(user) {
         }
     });
 
-    // Mostrar opções do gestor
+    // Mostrar opções de usuários e horários
     const userLevel = new URLSearchParams(window.location.search).get("nivel");
     if (userLevel === "gestor") {
-        gestorMenuItem.classList.remove("d-none");
-        gestorMenuItem.addEventListener("click", () => {
-            gestorSection.classList.remove("d-none");
+        usuariosMenuItem.classList.remove("d-none");
+        cadastroHorariosMenuItem.classList.remove("d-none");
+
+        usuariosMenuItem.addEventListener("click", () => {
+            usuariosSection.classList.remove("d-none");
+            horariosSection.classList.add("d-none");
             loadUsers();
         });
 
-        // Alternar entre abas
+        cadastroHorariosMenuItem.addEventListener("click", () => {
+            horariosSection.classList.remove("d-none");
+            usuariosSection.classList.add("d-none");
+            loadHorarios();
+        });
+
+        // Alternar entre abas da seção Usuários
         document.getElementById("cadastro-tab").addEventListener("click", () => {
             document.getElementById("cadastro").classList.add("show", "active");
             document.getElementById("usuarios").classList.remove("show", "active");
-            document.getElementById("horarios").classList.remove("show", "active");
         });
 
         document.getElementById("usuarios-tab").addEventListener("click", () => {
             document.getElementById("usuarios").classList.add("show", "active");
             document.getElementById("cadastro").classList.remove("show", "active");
-            document.getElementById("horarios").classList.remove("show", "active");
             loadUsers();
-        });
-
-        document.getElementById("horarios-tab").addEventListener("click", () => {
-            document.getElementById("horarios").classList.add("show", "active");
-            document.getElementById("cadastro").classList.remove("show", "active");
-            document.getElementById("usuarios").classList.remove("show", "active");
-            loadHorarios(); // Garantir que os horários sejam carregados ao ativar a aba
         });
 
         // Adicionar usuário

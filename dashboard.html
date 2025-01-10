@@ -48,9 +48,14 @@
                                 <i class="fas fa-calendar-alt"></i> Planejador de Aulas
                             </a>
                         </li>
-                        <li class="nav-item d-none" id="gestorMenuItem">
-                            <a class="nav-link" href="#gestorSection">
-                                <i class="fas fa-user-cog"></i> Gestor
+                        <li class="nav-item d-none" id="usuariosMenuItem">
+                            <a class="nav-link" href="#usuariosSection">
+                                <i class="fas fa-user-cog"></i> Usuários
+                            </a>
+                        </li>
+                        <li class="nav-item d-none" id="cadastroHorariosMenuItem">
+                            <a class="nav-link" href="#horariosSection">
+                                <i class="fas fa-clock"></i> Cadastro de Horários
                             </a>
                         </li>
                         <li class="nav-item">
@@ -101,22 +106,19 @@
                     </button>
                 </div>
 
-                <!-- Seção do Gestor -->
-                <section id="gestorSection" class="d-none">
+                <!-- Seção de Usuários -->
+                <section id="usuariosSection" class="d-none">
                     <h3>Gerenciamento de Usuários</h3>
                     <!-- Abas -->
-                    <ul class="nav nav-tabs" id="gestorTabs" role="tablist">
+                    <ul class="nav nav-tabs" id="usuariosTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="cadastro-tab" data-bs-toggle="tab" data-bs-target="#cadastro" type="button" role="tab" aria-controls="cadastro" aria-selected="true">Cadastro de Usuários</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab" aria-controls="usuarios" aria-selected="false">Usuários Cadastrados</button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="horarios-tab" data-bs-toggle="tab" data-bs-target="#horarios" type="button" role="tab" aria-controls="horarios" aria-selected="false">Cadastro de Horários</button>
-                        </li>
                     </ul>
-                    <div class="tab-content mt-3" id="gestorTabContent">
+                    <div class="tab-content mt-3" id="usuariosTabContent">
                         <!-- Aba Cadastro -->
                         <div class="tab-pane fade show active" id="cadastro" role="tabpanel" aria-labelledby="cadastro-tab">
                             <form id="addUserForm">
@@ -139,51 +141,52 @@
                             <h3>Usuários Cadastrados</h3>
                             <div id="userList" class="mt-3"></div>
                         </div>
-                        <!-- Aba Cadastro de Horários -->
-                        <div class="tab-pane fade" id="horarios" role="tabpanel" aria-labelledby="horarios-tab">
-                            <h3>Cadastro de Horários</h3>
-                            <div id="horariosContent">
-                                <label for="docente">Selecione o docente:</label>
-                                <select id="docente" class="form-select mb-3">
-                                    <option value="docente1">Docente 1</option>
-                                    <option value="docente2">Docente 2</option>
-                                    <option value="docente3">Docente 3</option>
-                                </select>
-                                <label for="month">Selecione o mês:</label>
-                                <select id="month" class="form-select mb-3">
-                                    <option value="1">Janeiro</option>
-                                    <option value="2">Fevereiro</option>
-                                    <option value="3">Março</option>
-                                    <option value="4">Abril</option>
-                                    <option value="5">Maio</option>
-                                    <option value="6">Junho</option>
-                                    <option value="7">Julho</option>
-                                    <option value="8">Agosto</option>
-                                    <option value="9">Setembro</option>
-                                    <option value="10">Outubro</option>
-                                    <option value="11">Novembro</option>
-                                    <option value="12">Dezembro</option>
-                                </select>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Data</th>
-                                            <th>Dia</th>
-                                            <th>Manhã</th>
-                                            <th>Tarde</th>
-                                            <th>Noite</th>
-                                            <th>Acumulado</th>
-                                            <th>Horário</th>
-                                            <th>Demanda</th>
-                                            <th>Feriado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="schedule-table"></tbody>
-                                </table>
-                                <div class="total-month text-end" id="total-month">Total mensal: 0 horas</div>
-                                <button class="btn btn-success mt-3" onclick="saveData()">Gravar Dados</button>
-                            </div>
-                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção Cadastro de Horários -->
+                <section id="horariosSection" class="d-none">
+                    <h3>Cadastro de Horários</h3>
+                    <div id="horariosContent">
+                        <label for="docente">Selecione o docente:</label>
+                        <select id="docente" class="form-select mb-3">
+                            <option value="docente1">Docente 1</option>
+                            <option value="docente2">Docente 2</option>
+                            <option value="docente3">Docente 3</option>
+                        </select>
+                        <label for="month">Selecione o mês:</label>
+                        <select id="month" class="form-select mb-3">
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Dia</th>
+                                    <th>Manhã</th>
+                                    <th>Tarde</th>
+                                    <th>Noite</th>
+                                    <th>Acumulado</th>
+                                    <th>Horário</th>
+                                    <th>Demanda</th>
+                                    <th>Feriado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedule-table"></tbody>
+                        </table>
+                        <div class="total-month text-end" id="total-month">Total mensal: 0 horas</div>
+                        <button class="btn btn-success mt-3" onclick="saveData()">Gravar Dados</button>
                     </div>
                 </section>
             </main>
