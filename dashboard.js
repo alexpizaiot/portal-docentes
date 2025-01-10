@@ -174,28 +174,26 @@ function initializeDashboard(user) {
                 row.classList.add("sunday-row");
             }
 
-            console.log(`Dia ${day}/${month + 1}: ${weekday} - Classes aplicadas: ${row.className}`); // Log para depuração
-
             row.innerHTML = `
                 <td>${date.toLocaleDateString("pt-BR")}</td>
                 <td>${weekday}</td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
                 <td class="total">0</td>
                 <td><input type="text" class="form-control"></td>
                 <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" class="form-check-input" onchange="markHoliday(this)"></td>
+                <td><input type="checkbox" class="form-check-input" onchange="markHolidayGlobal(this)"></td>
             `;
 
             tableBody.appendChild(row);
         }
 
-        updateMonthlyTotal();
+        updateMonthlyTotalGlobal();
     }
 
     // Função para marcar feriado
-    function markHoliday(checkbox) {
+    window.markHolidayGlobal = function markHolidayGlobal(checkbox) {
         const row = checkbox.closest("tr");
         if (checkbox.checked) {
             row.classList.add("holiday-row");
@@ -203,10 +201,10 @@ function initializeDashboard(user) {
             row.classList.remove("holiday-row");
         }
         console.log(`Checkbox alterado: ${checkbox.checked} - Classe 'holiday-row' aplicada: ${row.classList.contains("holiday-row")}`); // Log para depuração
-    }
+    };
 
     // Função para atualizar o total mensal
-    function updateMonthlyTotal() {
+    window.updateMonthlyTotalGlobal = function updateMonthlyTotalGlobal() {
         const totalCells = document.querySelectorAll(".total");
         const tableBody = document.getElementById("schedule-table");
         const rows = tableBody.querySelectorAll("tr");
@@ -226,7 +224,7 @@ function initializeDashboard(user) {
         });
 
         document.getElementById("total-month").textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-    }
+    };
 
     // Controle do menu hambúrguer
     menuButton.addEventListener("click", () => {
