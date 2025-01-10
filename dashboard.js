@@ -174,6 +174,8 @@ function initializeDashboard(user) {
                 row.classList.add("sunday-row");
             }
 
+            console.log(`Dia ${day}/${month + 1}: ${weekday} - Classes aplicadas: ${row.className}`); // Log para depuração
+
             row.innerHTML = `
                 <td>${date.toLocaleDateString("pt-BR")}</td>
                 <td>${weekday}</td>
@@ -200,6 +202,7 @@ function initializeDashboard(user) {
         } else {
             row.classList.remove("holiday-row");
         }
+        console.log(`Checkbox alterado: ${checkbox.checked} - Classe 'holiday-row' aplicada: ${row.classList.contains("holiday-row")}`); // Log para depuração
     }
 
     // Função para atualizar o total mensal
