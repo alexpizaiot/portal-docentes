@@ -1,4 +1,3 @@
-// Revisão do arquivo `dashboard.js`
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -78,7 +77,7 @@ function initializeDashboard(user) {
             document.getElementById("horarios").classList.add("show", "active");
             document.getElementById("cadastro").classList.remove("show", "active");
             document.getElementById("usuarios").classList.remove("show", "active");
-            loadHorarios();
+            loadHorarios(); // Garantir que os horários sejam carregados ao ativar a aba
         });
 
         // Adicionar usuário
@@ -208,12 +207,12 @@ function initializeDashboard(user) {
         const rows = tableBody.querySelectorAll("tr");
         let monthlyTotal = 0;
 
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const inputs = row.querySelectorAll("input[type='number']");
             const totalCell = row.querySelector(".total");
             let dailyTotal = 0;
 
-            inputs.forEach(input => {
+            inputs.forEach((input) => {
                 dailyTotal += parseFloat(input.value) || 0;
             });
 
