@@ -164,6 +164,14 @@ function initializeDashboard(user) {
             const weekday = weekdays[date.getDay()];
 
             const row = document.createElement("tr");
+
+            // Adicionar classes com base no dia
+            if (weekday === "SAB") {
+                row.classList.add("saturday-row");
+            } else if (weekday === "DOM") {
+                row.classList.add("sunday-row");
+            }
+
             row.innerHTML = `
                 <td>${date.toLocaleDateString("pt-BR")}</td>
                 <td>${weekday}</td>
@@ -173,13 +181,23 @@ function initializeDashboard(user) {
                 <td class="total">0</td>
                 <td><input type="text" class="form-control"></td>
                 <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" class="form-check-input"></td>
+                <td><input type="checkbox" class="form-check-input" onchange="markHoliday(this)"></td>
             `;
 
             tableBody.appendChild(row);
         }
 
         updateMonthlyTotal();
+    }
+
+    // Função para marcar feriado
+    function markHoliday(checkbox) {
+        const row = checkbox.closest("tr");
+        if (checkbox.checked) {
+            row.classList.add("holiday-row");
+        } else {
+            row.classList.remove("holiday-row");
+        }
     }
 
     // Função para atualizar o total mensal
