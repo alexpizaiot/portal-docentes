@@ -1,5 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 // Inicializar o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, (user) => {
@@ -30,6 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeDashboard(user) {
     const usuariosMenuItem = document.getElementById("usuariosMenuItem");
     const cadastroHorariosMenuItem = document.getElementById("cadastroHorariosMenuItem");
+    const usuariosSection = document.getElementById("usuariosSection");
+    const addUserForm = document.getElementById("addUserForm");
+    const emailInput = document.getElementById("emailInput");
+    const levelSelect = document.getElementById("levelSelect");
+    const userList = document.getElementById("userList");
     const menuButton = document.getElementById("menuButton");
     const sidebar = document.getElementById("sidebar");
 
@@ -38,6 +45,79 @@ function initializeDashboard(user) {
     if (userLevel === "gestor") {
         usuariosMenuItem.classList.remove("d-none");
         cadastroHorariosMenuItem.classList.remove("d-none");
+
+        usuariosMenuItem.addEventListener("click", () => {
+            usuariosSection.classList.remove("d-none");
+        });
+
+        // Função para carregar usuários cadastrados
+        async function loadUsers() {
+            userList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "autorizados"));
+            querySnapshot.forEach((doc) => {
+                const user = doc.data();
+                const div = document.createElement("div");
+                div.className = "d-flex justify-content-between align-items-center mb-2";
+                div.innerHTML = `
+                    <span>E-mail: ${user.email} | Nível: ${user.nivel}</span>
+                    <div>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${doc.id}">Editar</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Excluir</button>
+                    </div>
+                `;
+                userList.appendChild(div);
+            });
+
+            // Adicionar eventos de edição e exclusão
+            document.querySelectorAll(".edit-btn").forEach((btn) =>
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    const newNivel = prompt("Digite o novo nível (docente ou gestor):");
+                    if (newNivel) {
+                        try {
+                            await updateDoc(doc(db, "autorizados", id), { nivel: newNivel });
+                            alert("Nível atualizado com sucesso!");
+                            loadUsers();
+                        } catch (error) {
+                            console.error("Erro ao editar usuário:", error);
+                        }
+                    }
+                })
+            );
+
+            document.querySelectorAll(".delete-btn").forEach((btn) =>
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+                        try {
+                            await deleteDoc(doc(db, "autorizados", id));
+                            alert("Usuário excluído com sucesso!");
+                            loadUsers();
+                        } catch (error) {
+                            console.error("Erro ao excluir usuário:", error);
+                        }
+                    }
+                })
+            );
+        }
+
+        // Adicionar usuário
+        addUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const nivel = levelSelect.value;
+
+            try {
+                await addDoc(collection(db, "autorizados"), { email, nivel });
+                alert("Usuário adicionado com sucesso!");
+                addUserForm.reset();
+                loadUsers();
+            } catch (error) {
+                console.error("Erro ao adicionar usuário:", error);
+            }
+        });
+
+        loadUsers(); // Carregar lista de usuários ao iniciar
     }
 
     // Logout
