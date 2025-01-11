@@ -7,7 +7,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
     authDomain: "portaldocentes-fb404.firebaseapp.com",
     projectId: "portaldocentes-fb404",
-    storageBucket: "portaldocentes-fb404",
+    storageBucket: "portaldocentes-fb404.firebaseapp.com",
     messagingSenderId: "837457806876",
     appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
 };
@@ -33,8 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeDashboard(user) {
     const usuariosMenuItem = document.getElementById("usuariosMenuItem");
     const usuariosSection = document.getElementById("usuariosSection");
-    const cadastroHorariosMenuItem = document.getElementById("cadastroHorariosMenuItem");
-    const horariosSection = document.getElementById("horariosSection");
     const addUserForm = document.getElementById("addUserForm");
     const emailInput = document.getElementById("emailInput");
     const levelSelect = document.getElementById("levelSelect");
@@ -52,22 +50,14 @@ function initializeDashboard(user) {
         }
     });
 
-    // Mostrar opções de usuários e horários
+    // Mostrar opções de usuários
     const userLevel = new URLSearchParams(window.location.search).get("nivel");
     if (userLevel === "gestor") {
         usuariosMenuItem.classList.remove("d-none");
-        cadastroHorariosMenuItem.classList.remove("d-none");
 
         usuariosMenuItem.addEventListener("click", () => {
             usuariosSection.classList.remove("d-none");
-            horariosSection.classList.add("d-none");
             loadUsers();
-        });
-
-        cadastroHorariosMenuItem.addEventListener("click", () => {
-            horariosSection.classList.remove("d-none");
-            usuariosSection.classList.add("d-none");
-            console.log("A funcionalidade de horários foi movida para um arquivo separado.");
         });
 
         // Alternar entre abas da seção Usuários
