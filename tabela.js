@@ -15,8 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const row = document.createElement("tr");
 
             // Aplicar classes de estilo com base no dia da semana
-            if (weekday === 'SAB') row.classList.add("saturday-row");
-            if (weekday === 'DOM') row.classList.add("sunday-row");
+            if (weekday === 'SAB') {
+                row.classList.add("saturday-row");
+            }
+            if (weekday === 'DOM') {
+                row.classList.add("sunday-row");
+            }
 
             row.innerHTML = `
                 <td>${date.toLocaleDateString('pt-BR')}</td>
