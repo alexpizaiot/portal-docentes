@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -33,10 +33,8 @@ function initializeDashboard(user) {
     const usuariosMenuItem = document.getElementById("usuariosMenuItem");
     const cadastroHorariosMenuItem = document.getElementById("cadastroHorariosMenuItem");
     const usuariosSection = document.getElementById("usuariosSection");
-    const addUserForm = document.getElementById("addUserForm");
-    const emailInput = document.getElementById("emailInput");
-    const levelSelect = document.getElementById("levelSelect");
-    const userList = document.getElementById("userList");
+    const horariosSection = document.getElementById("horariosSection");
+    const tableBody = document.getElementById("schedule-table");
     const menuButton = document.getElementById("menuButton");
     const sidebar = document.getElementById("sidebar");
 
@@ -46,79 +44,76 @@ function initializeDashboard(user) {
         usuariosMenuItem.classList.remove("d-none");
         cadastroHorariosMenuItem.classList.remove("d-none");
 
-        usuariosMenuItem.addEventListener("click", () => {
-            usuariosSection.classList.remove("d-none");
+        cadastroHorariosMenuItem.addEventListener("click", () => {
+            horariosSection.classList.remove("d-none");
+            usuariosSection.classList.add("d-none");
+            loadHorarios(); // Carregar a tabela de horários
         });
+    }
 
-        // Função para carregar usuários cadastrados
-        async function loadUsers() {
-            userList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "autorizados"));
-            querySnapshot.forEach((doc) => {
-                const user = doc.data();
-                const div = document.createElement("div");
-                div.className = "d-flex justify-content-between align-items-center mb-2";
-                div.innerHTML = `
-                    <span>E-mail: ${user.email} | Nível: ${user.nivel}</span>
-                    <div>
-                        <button class="btn btn-sm btn-warning edit-btn" data-id="${doc.id}">Editar</button>
-                        <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Excluir</button>
-                    </div>
-                `;
-                userList.appendChild(div);
-            });
+    // Função para carregar dados de horários
+    async function loadHorarios() {
+        tableBody.innerHTML = ""; // Limpar tabela existente
+        const monthSelect = document.getElementById("month");
+        const docenteSelect = document.getElementById("docente");
+        const selectedMonth = parseInt(monthSelect.value, 10);
+        const selectedDocente = docenteSelect.value;
 
-            // Adicionar eventos de edição e exclusão
-            document.querySelectorAll(".edit-btn").forEach((btn) =>
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.dataset.id;
-                    const newNivel = prompt("Digite o novo nível (docente ou gestor):");
-                    if (newNivel) {
-                        try {
-                            await updateDoc(doc(db, "autorizados", id), { nivel: newNivel });
-                            alert("Nível atualizado com sucesso!");
-                            loadUsers();
-                        } catch (error) {
-                            console.error("Erro ao editar usuário:", error);
-                        }
-                    }
-                })
-            );
+        const daysInMonth = new Date(2025, selectedMonth, 0).getDate();
+        const weekdays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
-            document.querySelectorAll(".delete-btn").forEach((btn) =>
-                btn.addEventListener("click", async (e) => {
-                    const id = e.target.dataset.id;
-                    if (confirm("Tem certeza que deseja excluir este usuário?")) {
-                        try {
-                            await deleteDoc(doc(db, "autorizados", id));
-                            alert("Usuário excluído com sucesso!");
-                            loadUsers();
-                        } catch (error) {
-                            console.error("Erro ao excluir usuário:", error);
-                        }
-                    }
-                })
-            );
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(2025, selectedMonth - 1, day);
+            const weekday = weekdays[date.getDay()];
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${date.toLocaleDateString("pt-BR")}</td>
+                <td>${weekday}</td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotal()"></td>
+                <td class="total">0</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" class="form-check-input" onchange="markHoliday(this)"></td>
+            `;
+            tableBody.appendChild(row);
         }
 
-        // Adicionar usuário
-        addUserForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = emailInput.value.trim();
-            const nivel = levelSelect.value;
+        document.getElementById("total-month").textContent = `Total mensal: 0 horas`;
+    }
 
-            try {
-                await addDoc(collection(db, "autorizados"), { email, nivel });
-                alert("Usuário adicionado com sucesso!");
-                addUserForm.reset();
-                loadUsers();
-            } catch (error) {
-                console.error("Erro ao adicionar usuário:", error);
-            }
+    // Função para marcar feriados
+    window.markHoliday = function (checkbox) {
+        const row = checkbox.closest("tr");
+        if (checkbox.checked) {
+            row.classList.add("holiday-row");
+        } else {
+            row.classList.remove("holiday-row");
+        }
+    };
+
+    // Função para atualizar o total mensal
+    window.updateMonthlyTotal = function () {
+        const rows = tableBody.querySelectorAll("tr");
+        let monthlyTotal = 0;
+
+        rows.forEach((row) => {
+            const inputs = row.querySelectorAll("input[type='number']");
+            const totalCell = row.querySelector(".total");
+            let dailyTotal = 0;
+
+            inputs.forEach((input) => {
+                dailyTotal += parseFloat(input.value) || 0;
+            });
+
+            totalCell.textContent = dailyTotal.toFixed(1);
+            monthlyTotal += dailyTotal;
         });
 
-        loadUsers(); // Carregar lista de usuários ao iniciar
-    }
+        document.getElementById("total-month").textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
+    };
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
