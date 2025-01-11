@@ -7,7 +7,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
     authDomain: "portaldocentes-fb404.firebaseapp.com",
     projectId: "portaldocentes-fb404",
-    storageBucket: "portaldocentes-fb404.firebaseapp.com",
+    storageBucket: "portaldocentes-fb404",
     messagingSenderId: "837457806876",
     appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
 };
@@ -67,7 +67,7 @@ function initializeDashboard(user) {
         cadastroHorariosMenuItem.addEventListener("click", () => {
             horariosSection.classList.remove("d-none");
             usuariosSection.classList.add("d-none");
-            loadHorarios();
+            console.log("A funcionalidade de horários foi movida para um arquivo separado.");
         });
 
         // Alternar entre abas da seção Usuários
@@ -150,82 +150,6 @@ function initializeDashboard(user) {
         );
     }
 
-    // Função para carregar dados de horários
-    async function loadHorarios() {
-        const tableBody = document.getElementById("schedule-table");
-        const monthSelect = document.getElementById("month");
-        tableBody.innerHTML = ""; // Limpar tabela existente
-
-        const month = monthSelect.value - 1; // Ajustar para índice do JavaScript (0-11)
-        const year = new Date().getFullYear();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const weekdays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const weekday = weekdays[date.getDay()];
-
-            const row = document.createElement("tr");
-
-            // Adicionar classes com base no dia
-            if (weekday === "SAB") {
-                row.classList.add("saturday-row");
-            } else if (weekday === "DOM") {
-                row.classList.add("sunday-row");
-            }
-
-            row.innerHTML = `
-                <td>${date.toLocaleDateString("pt-BR")}</td>
-                <td>${weekday}</td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
-                <td><input type="number" class="form-control" step="0.1" min="0" onchange="updateMonthlyTotalGlobal()"></td>
-                <td class="total">0</td>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" class="form-check-input" onchange="markHolidayGlobal(this)"></td>
-            `;
-
-            tableBody.appendChild(row);
-        }
-
-        updateMonthlyTotalGlobal();
-    }
-
-    // Função para marcar feriado
-    window.markHolidayGlobal = function markHolidayGlobal(checkbox) {
-        const row = checkbox.closest("tr");
-        if (checkbox.checked) {
-            row.classList.add("holiday-row");
-        } else {
-            row.classList.remove("holiday-row");
-        }
-        console.log(`Checkbox alterado: ${checkbox.checked} - Classe 'holiday-row' aplicada: ${row.classList.contains("holiday-row")}`); // Log para depuração
-    };
-
-    // Função para atualizar o total mensal
-    window.updateMonthlyTotalGlobal = function updateMonthlyTotalGlobal() {
-        const totalCells = document.querySelectorAll(".total");
-        const tableBody = document.getElementById("schedule-table");
-        const rows = tableBody.querySelectorAll("tr");
-        let monthlyTotal = 0;
-
-        rows.forEach((row) => {
-            const inputs = row.querySelectorAll("input[type='number']");
-            const totalCell = row.querySelector(".total");
-            let dailyTotal = 0;
-
-            inputs.forEach((input) => {
-                dailyTotal += parseFloat(input.value) || 0;
-            });
-
-            totalCell.textContent = dailyTotal.toFixed(1);
-            monthlyTotal += dailyTotal;
-        });
-
-        document.getElementById("total-month").textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-    };
-
     // Controle do menu hambúrguer
     menuButton.addEventListener("click", () => {
         sidebar.classList.toggle("active");
@@ -236,8 +160,4 @@ function initializeDashboard(user) {
             sidebar.classList.remove("active");
         }
     });
-
-    // Listener para o dropdown de mês
-    const monthSelect = document.getElementById("month");
-    monthSelect.addEventListener("change", loadHorarios);
 }
