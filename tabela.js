@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function generateTable() {
         tableBody.innerHTML = ''; // Limpa o conteúdo do tbody
         const monthSelect = parseInt(document.getElementById("month").value);
-        const year = new Date().getFullYear(); // Ano atual - você pode alterar se necessário
+        const year = new Date().getFullYear(); // Ano atual
         const daysInMonth = new Date(year, monthSelect, 0).getDate();
 
         for (let day = 1; day <= daysInMonth; day++) {
@@ -41,11 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
             row.classList.add('holiday-row');
         } else {
             row.classList.remove('holiday-row');
+
+            // Reaplica classes padrão para sábados e domingos
             const dateCell = row.cells[0];
             const date = new Date(dateCell.textContent);
             const weekday = date.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase();
 
-            // Reaplica classes padrão para sábados e domingos
             if (weekday === 'SÁB.') {
                 row.classList.add('saturday-row');
             } else if (weekday === 'DOM.') {
