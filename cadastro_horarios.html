@@ -11,8 +11,10 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const nivelAcesso = localStorage.getItem("nivelAcesso");
-            if (nivelAcesso !== "gestor") {
-                window.location.href = "dashboard.html";
+
+            if (!nivelAcesso || nivelAcesso !== "gestor") {
+                alert("Acesso negado. Você será redirecionado para o dashboard.");
+                window.location.href = "dashboard.html?nivel=docente";
             }
         });
     </script>
