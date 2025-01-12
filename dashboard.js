@@ -1,3 +1,34 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+// Configuração do Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
+    authDomain: "portaldocentes-fb404.firebaseapp.com",
+    projectId: "portaldocentes-fb404",
+    storageBucket: "portaldocentes-fb404.appspot.com",
+    messagingSenderId: "837457806876",
+    appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
+};
+
+// Inicializar o Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+document.addEventListener("DOMContentLoaded", () => {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Redirecionar para a página de login
+            window.location.href = 'index.html';
+        } else {
+            console.log("Usuário autenticado:", user.email);
+            initializeDashboard(user);
+        }
+    });
+});
+
 function initializeDashboard(user) {
     const usuariosMenuItem = document.getElementById("usuariosMenuItem");
     const cadastroHorariosMenuItem = document.getElementById("cadastroHorariosMenuItem");
@@ -26,25 +57,30 @@ function initializeDashboard(user) {
         return;
     }
 
+    // Exibir menus específicos com base no nível de acesso
     if (userLevel === "gestor") {
-        usuariosMenuItem.classList.remove("d-none");
-        cadastroHorariosMenuItem.classList.remove("d-none");
+        if (usuariosMenuItem) usuariosMenuItem.classList.remove("d-none");
+        if (cadastroHorariosMenuItem) cadastroHorariosMenuItem.classList.remove("d-none");
 
         // Menu Usuários
-        usuariosMenuItem.addEventListener("click", () => {
-            usuariosSection.classList.remove("d-none");
-            horariosSection.classList.add("d-none");
-            loadUsers();
-        });
+        if (usuariosMenuItem) {
+            usuariosMenuItem.addEventListener("click", () => {
+                if (usuariosSection) usuariosSection.classList.remove("d-none");
+                if (horariosSection) horariosSection.classList.add("d-none");
+                loadUsers();
+            });
+        }
 
         // Menu Cadastro de Horários
-        cadastroHorariosMenuItem.addEventListener("click", () => {
-            horariosSection.classList.remove("d-none");
-            usuariosSection.classList.add("d-none");
-        });
+        if (cadastroHorariosMenuItem) {
+            cadastroHorariosMenuItem.addEventListener("click", () => {
+                if (horariosSection) horariosSection.classList.remove("d-none");
+                if (usuariosSection) usuariosSection.classList.add("d-none");
+            });
+        }
     } else {
-        usuariosMenuItem.classList.add("d-none");
-        cadastroHorariosMenuItem.classList.add("d-none");
+        if (usuariosMenuItem) usuariosMenuItem.classList.add("d-none");
+        if (cadastroHorariosMenuItem) cadastroHorariosMenuItem.classList.add("d-none");
     }
 
     // Função para carregar usuários cadastrados
