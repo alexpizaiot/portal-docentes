@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.getElementById("schedule-table-body"); // Seleciona o tbody
 
+    if (!tableBody) {
+        console.error("Elemento `schedule-table-body` não encontrado.");
+        return; // Impede a execução caso o elemento não exista
+    }
+
     function generateTable() {
         tableBody.innerHTML = ''; // Limpa o conteúdo do tbody
         const monthSelect = parseInt(document.getElementById("month").value);
@@ -33,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    window.markHoliday = function(checkbox) {
+    window.markHoliday = function (checkbox) {
         const row = checkbox.closest('tr');
         if (checkbox.checked) {
             row.classList.add('holiday-row');
@@ -50,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     };
-
 
     document.getElementById("month").addEventListener("change", generateTable);
     generateTable();
