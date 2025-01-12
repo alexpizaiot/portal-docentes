@@ -162,18 +162,12 @@ button:hover {
   }
 }
 
-/* Estilo para os dias de sábado */
+/* Estilos para os dias da semana e feriados */
 tr.saturday-row {
   background-color: #FFD700 !important; /* Amarelo escuro */
 }
 
-/* Estilo para os dias de domingo */
-tr.sunday-row {
-  background-color: #8B0000 !important; /* Vermelho escuro */
-  color: white !important; /* Melhor contraste */
-}
-
-/* Estilo para feriados */
+tr.sunday-row, /* Seletor combinado para domingo e feriados */
 tr.holiday-row {
   background-color: #8B0000 !important; /* Vermelho escuro */
   color: white !important; /* Melhor contraste */
