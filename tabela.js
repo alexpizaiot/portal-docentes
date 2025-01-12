@@ -1,11 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.getElementById("schedule-table-body"); // Seleciona o tbody
 
-    if (!tableBody) {
-        console.error("Elemento `schedule-table-body` não encontrado.");
-        return; // Impede a execução caso o elemento não exista
-    }
-
     function generateTable() {
         tableBody.innerHTML = ''; // Limpa o conteúdo do tbody
         const monthSelect = parseInt(document.getElementById("month").value);
@@ -17,9 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const weekday = date.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase();
             const row = document.createElement("tr");
 
-            if (weekday === 'SAB') {
+            // Aplica classes para sábados e domingos
+            if (weekday === 'SÁB.') {
                 row.classList.add("saturday-row");
-            } else if (weekday === 'DOM') {
+            } else if (weekday === 'DOM.') {
                 row.classList.add("sunday-row");
             }
 
@@ -38,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Função para marcar feriados
     window.markHoliday = function (checkbox) {
         const row = checkbox.closest('tr');
         if (checkbox.checked) {
@@ -48,14 +45,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const date = new Date(dateCell.textContent);
             const weekday = date.toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase();
 
-            if (weekday === 'SAB') {
+            // Reaplica classes padrão para sábados e domingos
+            if (weekday === 'SÁB.') {
                 row.classList.add('saturday-row');
-            } else if (weekday === 'DOM') {
+            } else if (weekday === 'DOM.') {
                 row.classList.add('sunday-row');
             }
         }
     };
 
+    // Evento para regenerar a tabela ao alterar o mês
     document.getElementById("month").addEventListener("change", generateTable);
-    generateTable();
+    generateTable(); // Gera a tabela inicial
 });
