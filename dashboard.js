@@ -42,7 +42,21 @@ function initializeDashboard(user) {
     const sidebar = document.getElementById("sidebar");
 
     // Controle do menu para nível gestor
-    const userLevel = new URLSearchParams(window.location.search).get("nivel");
+    let userLevel = new URLSearchParams(window.location.search).get("nivel");
+
+    // Salvar o nível de acesso no localStorage
+    if (userLevel) {
+        localStorage.setItem("nivelAcesso", userLevel);
+    } else {
+        userLevel = localStorage.getItem("nivelAcesso");
+    }
+
+    if (!userLevel) {
+        alert("Nível de acesso não definido. Redirecionando para login.");
+        window.location.href = 'index.html';
+        return;
+    }
+
     if (userLevel === "gestor") {
         usuariosMenuItem.classList.remove("d-none");
         cadastroHorariosMenuItem.classList.remove("d-none");
@@ -60,6 +74,9 @@ function initializeDashboard(user) {
             usuariosSection.classList.add("d-none");
             loadHorarios(); // Lógica de horários no arquivo tabela.js
         });
+    } else {
+        usuariosMenuItem.classList.add("d-none");
+        cadastroHorariosMenuItem.classList.add("d-none");
     }
 
     // Função para carregar usuários cadastrados
