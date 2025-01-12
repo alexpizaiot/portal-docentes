@@ -81,54 +81,81 @@ function initializeDashboard(user) {
 
     // Função para carregar usuários cadastrados
     async function loadUsers() {
-        userList.innerHTML = "";
-        const querySnapshot = await getDocs(collection(db, "autorizados"));
-        querySnapshot.forEach((doc) => {
-            const user = doc.data();
-            const div = document.createElement("div");
-            div.className = "d-flex justify-content-between align-items-center mb-2";
-            div.innerHTML = `
-                <span>E-mail: ${user.email} | Nível: ${user.nivel}</span>
-                <div>
-                    <button class="btn btn-sm btn-warning edit-btn" data-id="${doc.id}">Editar</button>
-                    <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Excluir</button>
-                </div>
-            `;
-            userList.appendChild(div);
-        });
+        userList.innerHTML = ""; // Limpa a lista antes de carregar
+        try {
+            const querySnapshot = await getDocs(collection(db, "autorizados")); // Certifique-se de que "autorizados" é a coleção correta
+            querySnapshot.forEach((doc) => {
+                const user = doc.data();
+                const div = document.createElement("div");
+                div.className = "d-flex justify-content-between align-items-center mb-2";
+                div.innerHTML = `
+                    <span>E-mail: ${user.email} | Nível: ${user.nivel}</span>
+                    <div>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${doc.id}">Editar</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Excluir</button>
+                    </div>
+                `;
+                userList.appendChild(div);
+            });
 
-        // Adicionar eventos de edição e exclusão
-        document.querySelectorAll(".edit-btn").forEach((btn) =>
-            btn.addEventListener("click", async (e) => {
-                const id = e.target.dataset.id;
-                const newNivel = prompt("Digite o novo nível (docente ou gestor):");
-                if (newNivel) {
-                    try {
-                        await updateDoc(doc(db, "autorizados", id), { nivel: newNivel });
-                        alert("Nível atualizado com sucesso!");
-                        loadUsers();
-                    } catch (error) {
-                        console.error("Erro ao editar usuário:", error);
+            // Adicionar eventos de edição e exclusão
+            document.querySelectorAll(".edit-btn").forEach((btn) =>
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    const newNivel = prompt("Digite o novo nível (docente ou gestor):");
+                    if (newNivel) {
+                        try {
+                            await updateDoc(doc(db, "autorizados", id), { nivel: newNivel });
+                            alert("Nível atualizado com sucesso!");
+                            loadUsers();
+                        } catch (error) {
+                            console.error("Erro ao editar usuário:", error);
+                        }
                     }
-                }
-            })
-        );
+                })
+            );
 
-        document.querySelectorAll(".delete-btn").forEach((btn) =>
-            btn.addEventListener("click", async (e) => {
-                const id = e.target.dataset.id;
-                if (confirm("Tem certeza que deseja excluir este usuário?")) {
-                    try {
-                        await deleteDoc(doc(db, "autorizados", id));
-                        alert("Usuário excluído com sucesso!");
-                        loadUsers();
-                    } catch (error) {
-                        console.error("Erro ao excluir usuário:", error);
+            document.querySelectorAll(".delete-btn").forEach((btn) =>
+                btn.addEventListener("click", async (e) => {
+                    const id = e.target.dataset.id;
+                    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+                        try {
+                            await deleteDoc(doc(db, "autorizados", id));
+                            alert("Usuário excluído com sucesso!");
+                            loadUsers();
+                        } catch (error) {
+                            console.error("Erro ao excluir usuário:", error);
+                        }
                     }
-                }
-            })
-        );
+                })
+            );
+        } catch (error) {
+            console.error("Erro ao carregar usuários:", error);
+        }
     }
+
+    // Função para adicionar novo usuário
+    addUserForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Previne o reload da página
+        const email = emailInput.value;
+        const nivel = levelSelect.value;
+
+        if (!email || !nivel) {
+            alert("Por favor, preencha todos os campos.");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "autorizados"), { email, nivel }); // Adiciona ao Firebase
+            alert("Usuário adicionado com sucesso!");
+            emailInput.value = ""; // Limpa o campo de e-mail
+            levelSelect.value = ""; // Limpa o nível selecionado
+            loadUsers(); // Recarrega a lista de usuários
+        } catch (error) {
+            console.error("Erro ao adicionar usuário:", error);
+            alert("Não foi possível adicionar o usuário.");
+        }
+    });
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
