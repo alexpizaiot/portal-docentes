@@ -80,10 +80,10 @@
             background-color: #0056b3;
         }
     </style>
-    <!-- Firebase Config -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
             authDomain: "portaldocentes-fb404.firebaseapp.com",
@@ -93,58 +93,20 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
+        // Inicialização do Firebase
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Cadastro de Horários</h1>
-        <label for="docente">Selecione o docente:</label>
-        <select id="docente">
-            <option value="docente1">Docente 1</option>
-            <option value="docente2">Docente 2</option>
-            <option value="docente3">Docente 3</option>
-        </select>
-        <label for="month">Selecione o mês:</label>
-        <select id="month" onchange="generateTable()">
-            <option value="1">Janeiro</option>
-            <option value="2">Fevereiro</option>
-            <option value="3">Março</option>
-            <option value="4">Abril</option>
-            <option value="5">Maio</option>
-            <option value="6">Junho</option>
-            <option value="7">Julho</option>
-            <option value="8">Agosto</option>
-            <option value="9">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-        </select>
-        <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Dia</th>
-                    <th>Manhã</th>
-                    <th>Tarde</th>
-                    <th>Noite</th>
-                    <th>Acumulado</th>
-                    <th>Horário</th>
-                    <th>Demanda</th>
-                    <th>Feriado</th>
-                </tr>
-            </thead>
-            <tbody id="schedule-table">
-                <!-- Linhas serão geradas dinamicamente -->
-            </tbody>
-        </table>
-        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
-        <button class="save-button" onclick="saveData()">Gravar Dados</button>
-        <button class="back-button" onclick="goBack()">Voltar</button>
-    </div>
 
-    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const nivelAcesso = localStorage.getItem("nivelAcesso");
+            const usuarioLogado = localStorage.getItem("usuarioLogado");
+
+            if (!usuarioLogado || !nivelAcesso || nivelAcesso !== "gestor") {
+                alert("Acesso negado. Você será redirecionado para o login.");
+                window.location.href = "index.html";
+            }
+        });
+
         function generateTable() {
             const month = document.getElementById('month').value;
             const tableBody = document.getElementById('schedule-table');
@@ -159,6 +121,7 @@
 
                 const row = document.createElement('tr');
 
+                // Aplica classes de estilo para sábado, domingo e feriados
                 if (weekday === 'SÁB.') {
                     row.classList.add('saturday');
                 } else if (weekday === 'DOM.') {
@@ -215,40 +178,88 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        function saveData() {
+        async function saveData() {
             const docente = document.getElementById('docente').value;
             const mes = document.getElementById('month').value;
-            const tableRows = document.querySelectorAll('#schedule-table tr');
-            const horarios = [];
+            const rows = document.querySelectorAll('#schedule-table tr');
 
-            tableRows.forEach(row => {
-                const data = row.children[0].textContent;
-                const dia = row.children[1].textContent;
-                const manha = row.children[2].children[0].value || 0;
-                const tarde = row.children[3].children[0].value || 0;
-                const noite = row.children[4].children[0].value || 0;
-                const acumulado = row.children[5].textContent || 0;
-                const horario = row.children[6].children[0].value || '';
-                const demanda = row.children[7].children[0].value || '';
-                const feriado = row.children[8].children[0].checked;
-
-                horarios.push({ data, dia, manha, tarde, noite, acumulado, horario, demanda, feriado });
+            const horarios = Array.from(rows).map(row => {
+                const cells = row.querySelectorAll('td');
+                return {
+                    data: cells[0].textContent,
+                    dia: cells[1].textContent,
+                    manha: parseFloat(cells[2].querySelector('input').value) || 0,
+                    tarde: parseFloat(cells[3].querySelector('input').value) || 0,
+                    noite: parseFloat(cells[4].querySelector('input').value) || 0,
+                    acumulado: parseFloat(cells[5].textContent) || 0,
+                    horario: cells[6].querySelector('input').value || '',
+                    demanda: cells[7].querySelector('input').value || '',
+                    feriado: cells[8].querySelector('input').checked
+                };
             });
 
-            db.collection('horarios').add({
-                docente,
-                mes,
-                horarios
-            })
-            .then(() => alert('Dados gravados com sucesso!'))
-            .catch(error => console.error('Erro ao gravar dados:', error));
+            try {
+                await db.collection('horarios').add({ docente, mes, horarios });
+                alert('Dados gravados com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar no Firebase:', error);
+                alert('Erro ao salvar os dados. Verifique o console para mais detalhes.');
+            }
         }
 
         function goBack() {
             window.location.href = "dashboard.html?nivel=gestor";
         }
 
+        // Gera a tabela inicial
         generateTable();
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Horários</h1>
+        <label for="docente">Selecione o docente:</label>
+        <select id="docente">
+            <option value="docente1">Docente 1</option>
+            <option value="docente2">Docente 2</option>
+            <option value="docente3">Docente 3</option>
+        </select>
+        <label for="month">Selecione o mês:</label>
+        <select id="month" onchange="generateTable()">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Dia</th>
+                    <th>Manhã</th>
+                    <th>Tarde</th>
+                    <th>Noite</th>
+                    <th>Acumulado</th>
+                    <th>Horário</th>
+                    <th>Demanda</th>
+                    <th>Feriado</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-table">
+                <!-- Linhas serão geradas dinamicamente -->
+            </tbody>
+        </table>
+        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
+        <button class="save-button" onclick="saveData()">Gravar Dados</button>
+        <button class="back-button" onclick="goBack()">Voltar</button>
+    </div>
 </body>
 </html>
