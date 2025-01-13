@@ -35,13 +35,13 @@
             color: #fff;
         }
         tr.saturday {
-            background-color: #fff9c4;
+            background-color: #fff9c4; /* Amarelo claro */
         }
         tr.sunday {
-            background-color: #ffcccb;
+            background-color: #ffcccb; /* Vermelho claro */
         }
         tr.holiday {
-            background-color: #d1c4e9;
+            background-color: #d1c4e9; /* Roxo claro */
         }
         input[type="number"], input[type="text"] {
             width: 100%;
@@ -80,133 +80,9 @@
             background-color: #0056b3;
         }
     </style>
-    <!-- Firebase -->
+    <!-- Adicionar o SDK do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script>
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
-            authDomain: "portaldocentes-fb404.firebaseapp.com",
-            projectId: "portaldocentes-fb404",
-            storageBucket: "portaldocentes-fb404.appspot.com",
-            messagingSenderId: "837457806876",
-            appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
-        };
-
-        // Inicializa o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Funções globais
-        window.markHoliday = function (checkbox) {
-            const row = checkbox.parentElement.parentElement;
-            if (checkbox.checked) {
-                row.classList.add('holiday');
-            } else {
-                row.classList.remove('holiday');
-            }
-        };
-
-        window.updateTotal = function (input) {
-            const row = input.parentElement.parentElement;
-            const cells = row.querySelectorAll('input[type="number"]');
-            const totalCell = row.querySelector('.total');
-            let total = 0;
-
-            cells.forEach(cell => {
-                total += parseFloat(cell.value) || 0;
-            });
-
-            totalCell.textContent = total.toFixed(1);
-            updateMonthlyTotal();
-        };
-
-        function updateMonthlyTotal() {
-            const totalCells = document.querySelectorAll('.total');
-            let monthlyTotal = 0;
-
-            totalCells.forEach(cell => {
-                monthlyTotal += parseFloat(cell.textContent) || 0;
-            });
-
-            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-        }
-
-        window.saveData = async function () {
-            const docente = document.getElementById('docente').value;
-            const month = document.getElementById('month').value;
-            const rows = document.querySelectorAll('#schedule-table tr');
-
-            const horarios = Array.from(rows).map(row => {
-                const cells = row.querySelectorAll('td');
-                const inputs = row.querySelectorAll('input');
-                return {
-                    data: cells[0].textContent,
-                    dia: cells[1].textContent,
-                    manha: parseFloat(inputs[0].value) || 0,
-                    tarde: parseFloat(inputs[1].value) || 0,
-                    noite: parseFloat(inputs[2].value) || 0,
-                    acumulado: parseFloat(cells[5].textContent) || 0,
-                    horario: inputs[3].value || '',
-                    demanda: inputs[4].value || '',
-                    feriado: inputs[5].checked || false,
-                };
-            });
-
-            try {
-                await db.collection('horarios').add({ docente, mes: month, horarios });
-                alert('Dados gravados com sucesso no Firebase!');
-            } catch (error) {
-                console.error('Erro ao salvar no Firebase:', error);
-                alert('Erro ao salvar os dados.');
-            }
-        };
-
-        window.generateTable = function () {
-            const month = document.getElementById('month').value || 1;
-            const tableBody = document.getElementById('schedule-table');
-            tableBody.innerHTML = '';
-
-            const daysInMonth = new Date(2025, month, 0).getDate();
-            const weekdays = ['DOM.', 'SEG.', 'TER.', 'QUA.', 'QUI.', 'SEX.', 'SÁB.'];
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(2025, month - 1, day);
-                const weekday = weekdays[date.getDay()];
-
-                const row = document.createElement('tr');
-
-                if (weekday === 'SÁB.') {
-                    row.classList.add('saturday');
-                } else if (weekday === 'DOM.') {
-                    row.classList.add('sunday');
-                }
-
-                row.innerHTML = `
-                    <td>${date.toLocaleDateString('pt-BR')}</td>
-                    <td>${weekday}</td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td class="total">0</td>
-                    <td><input type="text" placeholder="Horário"></td>
-                    <td><input type="text" placeholder="Demanda"></td>
-                    <td><input type="checkbox" onchange="markHoliday(this)"></td>
-                `;
-                tableBody.appendChild(row);
-            }
-            updateMonthlyTotal();
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            generateTable();
-        });
-
-        function goBack() {
-            window.location.href = "dashboard.html?nivel=gestor";
-        }
-    </script>
 </head>
 <body>
     <div class="container">
@@ -246,11 +122,120 @@
                     <th>Feriado</th>
                 </tr>
             </thead>
-            <tbody id="schedule-table"></tbody>
+            <tbody id="schedule-table">
+                <!-- Linhas serão geradas dinamicamente -->
+            </tbody>
         </table>
         <div class="total-month" id="total-month">Total mensal: 0 horas</div>
         <button class="save-button" onclick="saveData()">Gravar Dados</button>
         <button class="back-button" onclick="goBack()">Voltar</button>
     </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
+            authDomain: "portaldocentes-fb404.firebaseapp.com",
+            projectId: "portaldocentes-fb404",
+            storageBucket: "portaldocentes-fb404.appspot.com",
+            messagingSenderId: "837457806876",
+            appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
+        };
+
+        // Inicializar o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function generateTable() {
+            const month = document.getElementById('month').value;
+            const tableBody = document.getElementById('schedule-table');
+            tableBody.innerHTML = '';
+
+            const daysInMonth = new Date(2025, month, 0).getDate();
+            const weekdays = ['DOM.', 'SEG.', 'TER.', 'QUA.', 'QUI.', 'SEX.', 'SÁB.'];
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(2025, month - 1, day);
+                const weekday = weekdays[date.getDay()];
+
+                const row = document.createElement('tr');
+
+                if (weekday === 'SÁB.') row.classList.add('saturday');
+                if (weekday === 'DOM.') row.classList.add('sunday');
+
+                row.innerHTML = `
+                    <td>${date.toLocaleDateString('pt-BR')}</td>
+                    <td>${weekday}</td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td class="total">0</td>
+                    <td><input type="text" placeholder="Horário"></td>
+                    <td><input type="text" placeholder="Demanda"></td>
+                    <td><input type="checkbox" onchange="markHoliday(this)"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+
+        function saveData() {
+            const docente = document.getElementById('docente').value;
+            const month = document.getElementById('month').value;
+            const tableRows = document.querySelectorAll('#schedule-table tr');
+
+            const data = Array.from(tableRows).map(row => {
+                const inputs = row.querySelectorAll('input');
+                return {
+                    data: row.cells[0].textContent,
+                    dia: row.cells[1].textContent,
+                    manha: parseFloat(inputs[0].value) || 0,
+                    tarde: parseFloat(inputs[1].value) || 0,
+                    noite: parseFloat(inputs[2].value) || 0,
+                    acumulado: parseFloat(row.cells[5].textContent) || 0,
+                    horario: inputs[3].value || '',
+                    demanda: inputs[4].value || '',
+                    feriado: inputs[5].checked
+                };
+            });
+
+            db.collection('horarios').add({
+                docente,
+                mes: month,
+                horarios: data
+            }).then(() => {
+                alert('Dados salvos com sucesso!');
+            }).catch(error => {
+                console.error('Erro ao salvar no Firebase:', error);
+            });
+        }
+
+        function updateTotal(input) {
+            const row = input.parentElement.parentElement;
+            const cells = row.querySelectorAll('input[type="number"]');
+            const totalCell = row.querySelector('.total');
+            let total = 0;
+
+            cells.forEach(cell => {
+                total += parseFloat(cell.value) || 0;
+            });
+
+            totalCell.textContent = total.toFixed(1);
+        }
+
+        function markHoliday(checkbox) {
+            const row = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                row.classList.add('holiday');
+            } else {
+                row.classList.remove('holiday');
+            }
+        }
+
+        function goBack() {
+            window.location.href = "dashboard.html?nivel=gestor";
+        }
+
+        document.addEventListener("DOMContentLoaded", generateTable);
+    </script>
 </body>
 </html>
