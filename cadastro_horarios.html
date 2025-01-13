@@ -40,12 +40,15 @@
                 <section id="horariosSection">
                     <h3>Cadastro de Horários</h3>
                     <div id="horariosContent">
+                        <!-- Seleção de Docente -->
                         <label for="docente">Selecione o docente:</label>
                         <select id="docente" class="form-select mb-3">
                             <option value="docente1">Docente 1</option>
                             <option value="docente2">Docente 2</option>
                             <option value="docente3">Docente 3</option>
                         </select>
+                        
+                        <!-- Seleção de Mês -->
                         <label for="month">Selecione o mês:</label>
                         <select id="month" class="form-select mb-3">
                             <option value="1">Janeiro</option>
@@ -61,7 +64,9 @@
                             <option value="11">Novembro</option>
                             <option value="12">Dezembro</option>
                         </select>
-                        <table class="table">
+                        
+                        <!-- Tabela -->
+                        <table class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>Data</th>
@@ -75,9 +80,15 @@
                                     <th>Feriado</th>
                                 </tr>
                             </thead>
-                            <tbody id="schedule-table-body"></tbody>
+                            <tbody id="schedule-table-body">
+                                <!-- As linhas da tabela serão geradas dinamicamente -->
+                            </tbody>
                         </table>
+                        
+                        <!-- Total Mensal -->
                         <div class="total-month text-end" id="total-month">Total mensal: 0 horas</div>
+                        
+                        <!-- Botão de Gravação -->
                         <button class="btn btn-success mt-3" onclick="saveData()">Gravar Dados</button>
                     </div>
                 </section>
