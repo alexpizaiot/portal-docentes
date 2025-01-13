@@ -80,8 +80,24 @@
             background-color: #0056b3;
         }
     </style>
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script>
-        // Verifica se o usuário está autenticado e se tem nível de acesso 'gestor'
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
+            authDomain: "portaldocentes-fb404.firebaseapp.com",
+            projectId: "portaldocentes-fb404",
+            storageBucket: "portaldocentes-fb404.appspot.com",
+            messagingSenderId: "837457806876",
+            appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
+        };
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
         document.addEventListener("DOMContentLoaded", () => {
             const nivelAcesso = localStorage.getItem("nivelAcesso");
             const usuarioLogado = localStorage.getItem("usuarioLogado");
@@ -155,7 +171,6 @@
 
                 const row = document.createElement('tr');
 
-                // Aplica classes de estilo para sábado, domingo e feriados
                 if (weekday === 'SÁB.') {
                     row.classList.add('saturday');
                 } else if (weekday === 'DOM.') {
@@ -212,15 +227,50 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        function saveData() {
-            alert('Dados gravados com sucesso!');
+        async function saveData() {
+            const docente = document.getElementById('docente').value;
+            const month = document.getElementById('month').value;
+            const rows = document.querySelectorAll('#schedule-table tr');
+            const horarios = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const inputs = row.querySelectorAll('input');
+
+                horarios.push({
+                    data: cells[0].textContent,
+                    dia: cells[1].textContent,
+                    manha: parseFloat(inputs[0].value) || 0,
+                    tarde: parseFloat(inputs[1].value) || 0,
+                    noite: parseFloat(inputs[2].value) || 0,
+                    acumulado: parseFloat(cells[5].textContent) || 0,
+                    horario: inputs[3].value || "",
+                    demanda: inputs[4].value || "",
+                    feriado: inputs[5].checked
+                });
+            });
+
+            const totalMensal = horarios.reduce((sum, h) => sum + h.acumulado, 0);
+
+            try {
+                await db.collection('horarios').add({
+                    docente,
+                    mes: month,
+                    ano: "2025",
+                    horario: horarios,
+                    totalmensal: totalMensal
+                });
+                alert('Dados gravados com sucesso no Firebase!');
+            } catch (error) {
+                console.error('Erro ao salvar no Firebase:', error);
+                alert('Erro ao salvar os dados.');
+            }
         }
 
         function goBack() {
             window.location.href = "dashboard.html?nivel=gestor";
         }
 
-        // Gera a tabela inicial
         generateTable();
     </script>
 </body>
