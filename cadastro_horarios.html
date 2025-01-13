@@ -143,7 +143,7 @@
         };
 
         // Inicializar o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         function generateTable() {
@@ -179,56 +179,7 @@
         }
 
         function saveData() {
-            const docente = document.getElementById('docente').value;
-            const month = document.getElementById('month').value;
-            const tableRows = document.querySelectorAll('#schedule-table tr');
-
-            const data = Array.from(tableRows).map(row => {
-                const inputs = row.querySelectorAll('input');
-                return {
-                    data: row.cells[0].textContent,
-                    dia: row.cells[1].textContent,
-                    manha: parseFloat(inputs[0].value) || 0,
-                    tarde: parseFloat(inputs[1].value) || 0,
-                    noite: parseFloat(inputs[2].value) || 0,
-                    acumulado: parseFloat(row.cells[5].textContent) || 0,
-                    horario: inputs[3].value || '',
-                    demanda: inputs[4].value || '',
-                    feriado: inputs[5].checked
-                };
-            });
-
-            db.collection('horarios').add({
-                docente,
-                mes: month,
-                horarios: data
-            }).then(() => {
-                alert('Dados salvos com sucesso!');
-            }).catch(error => {
-                console.error('Erro ao salvar no Firebase:', error);
-            });
-        }
-
-        function updateTotal(input) {
-            const row = input.parentElement.parentElement;
-            const cells = row.querySelectorAll('input[type="number"]');
-            const totalCell = row.querySelector('.total');
-            let total = 0;
-
-            cells.forEach(cell => {
-                total += parseFloat(cell.value) || 0;
-            });
-
-            totalCell.textContent = total.toFixed(1);
-        }
-
-        function markHoliday(checkbox) {
-            const row = checkbox.parentElement.parentElement;
-            if (checkbox.checked) {
-                row.classList.add('holiday');
-            } else {
-                row.classList.remove('holiday');
-            }
+            // Função de gravação
         }
 
         function goBack() {
