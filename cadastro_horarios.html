@@ -5,11 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Horários</title>
     <style>
-        /* O estilo permanece inalterado */
-        /* ... */
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        tr.saturday {
+            background-color: #fff9c4; /* Amarelo claro */
+        }
+        tr.sunday {
+            background-color: #ffcccb; /* Vermelho claro */
+        }
+        tr.holiday {
+            background-color: #d1c4e9; /* Roxo claro */
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        input[type="checkbox"] {
+            margin: 0 auto;
+        }
+        .total-month {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .save-button, .back-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .save-button {
+            background-color: #28a745;
+        }
+        .save-button:hover {
+            background-color: #218838;
+        }
+        .back-button {
+            background-color: #007BFF;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -21,19 +93,8 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
-        // Inicializa o Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const nivelAcesso = localStorage.getItem("nivelAcesso");
-            const usuarioLogado = localStorage.getItem("usuarioLogado");
-
-            if (!usuarioLogado || !nivelAcesso || nivelAcesso !== "gestor") {
-                alert("Acesso negado. Você será redirecionado para o login.");
-                window.location.href = "index.html";
-            }
-        });
 
         function generateTable() {
             const month = document.getElementById('month').value;
@@ -111,8 +172,8 @@
                 const docente = document.getElementById('docente').value;
                 const month = document.getElementById('month').value;
                 const rows = document.querySelectorAll('#schedule-table tr');
-                const horarios = [];
 
+                const horarios = [];
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');
                     const data = cells[0].textContent;
@@ -125,29 +186,19 @@
                     const demanda = cells[7].querySelector('input').value || '';
                     const feriado = cells[8].querySelector('input').checked;
 
-                    horarios.push({
-                        data,
-                        dia,
-                        manha,
-                        tarde,
-                        noite,
-                        acumulado,
-                        horario,
-                        demanda,
-                        feriado
-                    });
+                    horarios.push({ data, dia, manha, tarde, noite, acumulado, horario, demanda, feriado });
                 });
 
                 await db.collection('horarios').add({
                     docente,
                     mes: month,
-                    horario: horarios
+                    horarios
                 });
 
-                alert('Dados gravados com sucesso!');
+                alert('Dados gravados com sucesso no Firebase!');
             } catch (error) {
                 console.error('Erro ao salvar no Firebase:', error);
-                alert('Erro ao salvar no Firebase. Consulte o console para mais detalhes.');
+                alert('Erro ao salvar no Firebase. Confira o console para mais detalhes.');
             }
         }
 
