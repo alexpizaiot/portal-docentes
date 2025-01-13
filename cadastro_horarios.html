@@ -79,25 +79,30 @@
             background-color: #0056b3;
         }
     </style>
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Cadastro de Horários</h1>
         <label for="docente">Selecione o docente:</label>
-        <select id="docente" onchange="loadData()">
+        <select id="docente">
             <option value="docente1">Docente 1</option>
             <option value="docente2">Docente 2</option>
             <option value="docente3">Docente 3</option>
         </select>
         <label for="month">Selecione o mês:</label>
-        <select id="month" onchange="loadData()">
+        <select id="month" onchange="handleMonthChange()">
             <option value="1">Janeiro</option>
             <option value="2">Fevereiro</option>
             <option value="3">Março</option>
-            <!-- Outros meses -->
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
         </select>
         <table>
             <thead>
@@ -121,8 +126,10 @@
         <button class="back-button" onclick="goBack()">Voltar</button>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
             authDomain: "portaldocentes-fb404.firebaseapp.com",
@@ -132,13 +139,22 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        function handleMonthChange() {
+            generateTable();
+            loadExistingData();
+        }
 
         function generateTable() {
             const monthSelect = document.getElementById('month');
             const tableBody = document.getElementById('schedule-table');
+
+            if (!monthSelect || !tableBody) {
+                console.error("Elementos necessários não encontrados.");
+                return;
+            }
 
             const month = monthSelect.value;
             tableBody.innerHTML = '';
@@ -170,95 +186,42 @@
             updateMonthlyTotal();
         }
 
-        async function loadData() {
-            const docente = document.getElementById("docente").value;
-            const month = document.getElementById("month").value;
-            const docId = `${docente}_${month}`;
+        function loadExistingData() {
+            const docente = document.getElementById('docente').value;
+            const month = document.getElementById('month').value;
 
-            try {
-                const docRef = db.collection("horarios_teste").doc(docId);
-                const doc = await docRef.get();
-
-                if (doc.exists) {
-                    const data = doc.data();
-                    const horarios = data.horarios;
-
-                    const tableRows = document.querySelectorAll("#schedule-table tr");
-                    horarios.forEach((horario, index) => {
-                        if (tableRows[index]) {
-                            const cells = tableRows[index].querySelectorAll("input");
-                            cells[0].value = horario.manha || 0;
-                            cells[1].value = horario.tarde || 0;
-                            cells[2].value = horario.noite || 0;
-                            cells[3].value = horario.horario || "";
-                            cells[4].value = horario.demanda || "";
-                            cells[5].checked = horario.feriado || false;
-
-                            const totalCell = tableRows[index].querySelector(".total");
-                            const total = (horario.manha || 0) + (horario.tarde || 0) + (horario.noite || 0);
-                            totalCell.textContent = total.toFixed(1);
-                        }
-                    });
-
-                    updateMonthlyTotal();
-                    alert("Dados carregados com sucesso!");
-                } else {
-                    resetTable();
-                    alert("Nenhum horário encontrado para o docente e mês selecionados.");
-                }
-            } catch (error) {
-                console.error("Erro ao carregar os dados:", error);
-                alert("Erro ao carregar os dados. Veja o console para mais detalhes.");
-            }
-        }
-
-        function resetTable() {
-            const tableRows = document.querySelectorAll("#schedule-table tr");
-
-            tableRows.forEach(row => {
-                const cells = row.querySelectorAll("input");
-                cells[0].value = "";
-                cells[1].value = "";
-                cells[2].value = "";
-                cells[3].value = "";
-                cells[4].value = "";
-                cells[5].checked = false;
-
-                const totalCell = row.querySelector(".total");
-                totalCell.textContent = "0";
-            });
-
-            updateMonthlyTotal();
-        }
-
-        function saveData() {
-            const docente = document.getElementById("docente").value;
-            const month = document.getElementById("month").value;
-            const docId = `${docente}_${month}`;
-
-            const tableRows = document.querySelectorAll("#schedule-table tr");
-            const horarios = Array.from(tableRows).map(row => {
-                const cells = row.querySelectorAll("input");
-                return {
-                    manha: parseFloat(cells[0].value) || 0,
-                    tarde: parseFloat(cells[1].value) || 0,
-                    noite: parseFloat(cells[2].value) || 0,
-                    horario: cells[3].value || "",
-                    demanda: cells[4].value || "",
-                    feriado: cells[5].checked || false
-                };
-            });
-
-            const data = { docente, mes: month, horarios };
-
-            db.collection("horarios_teste").doc(docId).set(data)
-                .then(() => {
-                    alert("Dados salvos com sucesso!");
+            db.collection('horarios_teste').where('docente', '==', docente).where('mes', '==', month)
+                .get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        const data = querySnapshot.docs[0].data();
+                        populateForm(data);
+                    } else {
+                        console.log("Nenhum dado existente encontrado para este mês e docente.");
+                    }
                 })
-                .catch(error => {
-                    console.error("Erro ao salvar os dados:", error);
-                    alert("Erro ao salvar os dados. Veja o console para mais detalhes.");
-                });
+                .catch(error => console.error("Erro ao carregar dados existentes:", error));
+        }
+
+        function populateForm(data) {
+            const tableBody = document.getElementById('schedule-table');
+            if (!data || !data.horarios || !tableBody) return;
+
+            data.horarios.forEach((horario, index) => {
+                const row = tableBody.rows[index];
+                if (!row) return;
+
+                row.cells[2].querySelector('input').value = horario.manha;
+                row.cells[3].querySelector('input').value = horario.tarde;
+                row.cells[4].querySelector('input').value = horario.noite;
+                row.cells[6].querySelector('input').value = horario.horario;
+                row.cells[7].querySelector('input').value = horario.demanda;
+                if (horario.feriado) {
+                    row.cells[8].querySelector('input').checked = true;
+                    row.classList.add('holiday');
+                }
+                updateTotal(row.cells[2].querySelector('input'));
+            });
         }
 
         function updateTotal(input) {
@@ -275,6 +238,15 @@
             updateMonthlyTotal();
         }
 
+        function markHoliday(checkbox) {
+            const row = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                row.classList.add('holiday');
+            } else {
+                row.classList.remove('holiday');
+            }
+        }
+
         function updateMonthlyTotal() {
             const totalCells = document.querySelectorAll('.total');
             let monthlyTotal = 0;
@@ -286,13 +258,40 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        function markHoliday(checkbox) {
-            const row = checkbox.parentElement.parentElement;
-            if (checkbox.checked) {
-                row.classList.add('holiday');
-            } else {
-                row.classList.remove('holiday');
-            }
+        function saveData() {
+            const docente = document.getElementById('docente').value;
+            const month = document.getElementById('month').value;
+            const tableBody = document.getElementById('schedule-table');
+            const rows = Array.from(tableBody.rows);
+
+            const horarios = rows.map(row => {
+                return {
+                    data: row.cells[0].textContent,
+                    manha: parseFloat(row.cells[2].querySelector('input').value) || 0,
+                    tarde: parseFloat(row.cells[3].querySelector('input').value) || 0,
+                    noite: parseFloat(row.cells[4].querySelector('input').value) || 0,
+                    horario: row.cells[6].querySelector('input').value,
+                    demanda: row.cells[7].querySelector('input').value,
+                    feriado: row.cells[8].querySelector('input').checked
+                };
+            });
+
+            const data = { docente, mes: month, horarios };
+
+            db.collection('horarios_teste').where('docente', '==', docente).where('mes', '==', month)
+                .get()
+                .then(querySnapshot => {
+                    if (!querySnapshot.empty) {
+                        const docId = querySnapshot.docs[0].id;
+                        db.collection('horarios_teste').doc(docId).set(data)
+                            .then(() => alert("Dados atualizados com sucesso!"))
+                            .catch(error => console.error("Erro ao atualizar os dados:", error));
+                    } else {
+                        db.collection('horarios_teste').add(data)
+                            .then(() => alert("Dados gravados com sucesso!"))
+                            .catch(error => console.error("Erro ao gravar os dados:", error));
+                    }
+                });
         }
 
         function goBack() {
