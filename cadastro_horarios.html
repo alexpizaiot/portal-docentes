@@ -193,40 +193,6 @@
             updateMonthlyTotal();
         }
 
-        function updateTotal(input) {
-            const row = input.parentElement.parentElement;
-            const cells = row.querySelectorAll('input[type="number"]');
-            const totalCell = row.querySelector('.total');
-            let total = 0;
-
-            cells.forEach(cell => {
-                total += parseFloat(cell.value) || 0;
-            });
-
-            totalCell.textContent = total.toFixed(1);
-            updateMonthlyTotal();
-        }
-
-        function markHoliday(checkbox) {
-            const row = checkbox.parentElement.parentElement;
-            if (checkbox.checked) {
-                row.classList.add('holiday');
-            } else {
-                row.classList.remove('holiday');
-            }
-        }
-
-        function updateMonthlyTotal() {
-            const totalCells = document.querySelectorAll('.total');
-            let monthlyTotal = 0;
-
-            totalCells.forEach(cell => {
-                monthlyTotal += parseFloat(cell.textContent) || 0;
-            });
-
-            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-        }
-
         async function saveData() {
             const docente = document.getElementById('docente').value;
             const month = document.getElementById('month').value;
@@ -264,6 +230,40 @@
             } catch (error) {
                 console.error('Erro ao salvar no Firebase:', error);
                 alert('Erro ao salvar os dados.');
+            }
+        }
+
+        function updateTotal(input) {
+            const row = input.parentElement.parentElement;
+            const cells = row.querySelectorAll('input[type="number"]');
+            const totalCell = row.querySelector('.total');
+            let total = 0;
+
+            cells.forEach(cell => {
+                total += parseFloat(cell.value) || 0;
+            });
+
+            totalCell.textContent = total.toFixed(1);
+            updateMonthlyTotal();
+        }
+
+        function updateMonthlyTotal() {
+            const totalCells = document.querySelectorAll('.total');
+            let monthlyTotal = 0;
+
+            totalCells.forEach(cell => {
+                monthlyTotal += parseFloat(cell.textContent) || 0;
+            });
+
+            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
+        }
+
+        function markHoliday(checkbox) {
+            const row = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                row.classList.add('holiday');
+            } else {
+                row.classList.remove('holiday');
             }
         }
 
