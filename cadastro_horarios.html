@@ -4,89 +4,199 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Horários</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const nivelAcesso = localStorage.getItem("nivelAcesso");
-
-            if (!nivelAcesso || nivelAcesso !== "gestor") {
-                alert("Acesso negado. Você será redirecionado para o dashboard.");
-                window.location.href = "dashboard.html?nivel=docente";
-            }
-        });
-    </script>
+    <style>
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        tr.saturday {
+            background-color: #fff9c4; /* Amarelo claro */
+        }
+        tr.sunday {
+            background-color: #ffcccb; /* Vermelho claro */
+        }
+        tr.holiday {
+            background-color: #d1c4e9; /* Roxo claro */
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        input[type="checkbox"] {
+            margin: 0 auto;
+        }
+        .total-month {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .save-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .save-button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Menu Lateral -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-                <div class="position-sticky">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="dashboard.html?nivel=gestor">
-                                <i class="fas fa-home"></i> Voltar ao Dashboard
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Área Principal -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main">
-                <section id="horariosSection">
-                    <h3>Cadastro de Horários</h3>
-                    <div id="horariosContent">
-                        <label for="docente">Selecione o docente:</label>
-                        <select id="docente" class="form-select mb-3">
-                            <option value="docente1">Docente 1</option>
-                            <option value="docente2">Docente 2</option>
-                            <option value="docente3">Docente 3</option>
-                        </select>
-                        <label for="month">Selecione o mês:</label>
-                        <select id="month" class="form-select mb-3" onchange="generateTable()">
-                            <option value="1">Janeiro</option>
-                            <option value="2">Fevereiro</option>
-                            <option value="3">Março</option>
-                            <option value="4">Abril</option>
-                            <option value="5">Maio</option>
-                            <option value="6">Junho</option>
-                            <option value="7">Julho</option>
-                            <option value="8">Agosto</option>
-                            <option value="9">Setembro</option>
-                            <option value="10">Outubro</option>
-                            <option value="11">Novembro</option>
-                            <option value="12">Dezembro</option>
-                        </select>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Dia</th>
-                                    <th>Manhã</th>
-                                    <th>Tarde</th>
-                                    <th>Noite</th>
-                                    <th>Acumulado</th>
-                                    <th>Horário</th>
-                                    <th>Demanda</th>
-                                    <th>Feriado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="schedule-table">
-                                <!-- Linhas geradas dinamicamente -->
-                            </tbody>
-                        </table>
-                        <div class="total-month text-end" id="total-month">Total mensal: 0 horas</div>
-                        <button class="btn btn-success mt-3 save-button" onclick="saveData()">Gravar Dados</button>
-                    </div>
-                </section>
-            </main>
-        </div>
+    <div class="container">
+        <h1>Cadastro de Horários</h1>
+        <label for="docente">Selecione o docente:</label>
+        <select id="docente">
+            <option value="docente1">Docente 1</option>
+            <option value="docente2">Docente 2</option>
+            <option value="docente3">Docente 3</option>
+        </select>
+        <label for="month">Selecione o mês:</label>
+        <select id="month" onchange="generateTable()">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Dia</th>
+                    <th>Manhã</th>
+                    <th>Tarde</th>
+                    <th>Noite</th>
+                    <th>Acumulado</th>
+                    <th>Horário</th>
+                    <th>Demanda</th>
+                    <th>Feriado</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-table">
+                <!-- Linhas serão geradas dinamicamente -->
+            </tbody>
+        </table>
+        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
+        <button class="save-button" onclick="saveData()">Gravar Dados</button>
     </div>
 
-    <!-- Scripts -->
-    <script src="tabela.js"></script>
+    <script>
+        function generateTable() {
+            const month = document.getElementById('month').value;
+            const tableBody = document.getElementById('schedule-table');
+            tableBody.innerHTML = '';
+
+            const daysInMonth = new Date(2025, month, 0).getDate();
+            const weekdays = ['DOM.', 'SEG.', 'TER.', 'QUA.', 'QUI.', 'SEX.', 'SÁB.'];
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(2025, month - 1, day);
+                const weekday = weekdays[date.getDay()];
+
+                const row = document.createElement('tr');
+
+                // Aplica classes de estilo para sábado, domingo e feriados
+                if (weekday === 'SÁB.') {
+                    row.classList.add('saturday');
+                } else if (weekday === 'DOM.') {
+                    row.classList.add('sunday');
+                }
+
+                row.innerHTML = `
+                    <td>${date.toLocaleDateString('pt-BR')}</td>
+                    <td>${weekday}</td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td class="total">0</td>
+                    <td><input type="text" placeholder="Horário"></td>
+                    <td><input type="text" placeholder="Demanda"></td>
+                    <td><input type="checkbox" onchange="markHoliday(this)"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+            updateMonthlyTotal();
+        }
+
+        function updateTotal(input) {
+            const row = input.parentElement.parentElement;
+            const cells = row.querySelectorAll('input[type="number"]');
+            const totalCell = row.querySelector('.total');
+            let total = 0;
+
+            cells.forEach(cell => {
+                total += parseFloat(cell.value) || 0;
+            });
+
+            totalCell.textContent = total.toFixed(1);
+            updateMonthlyTotal();
+        }
+
+        function markHoliday(checkbox) {
+            const row = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                row.classList.add('holiday');
+            } else {
+                row.classList.remove('holiday');
+            }
+        }
+
+        function updateMonthlyTotal() {
+            const totalCells = document.querySelectorAll('.total');
+            let monthlyTotal = 0;
+
+            totalCells.forEach(cell => {
+                monthlyTotal += parseFloat(cell.textContent) || 0;
+            });
+
+            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
+        }
+
+        function saveData() {
+            alert('Dados gravados com sucesso!');
+        }
+
+        // Gera a tabela inicial
+        generateTable();
+    </script>
 </body>
 </html>
