@@ -35,13 +35,13 @@
             color: #fff;
         }
         tr.saturday {
-            background-color: #fff9c4; /* Amarelo claro */
+            background-color: #fff9c4;
         }
         tr.sunday {
-            background-color: #ffcccb; /* Vermelho claro */
+            background-color: #ffcccb;
         }
         tr.holiday {
-            background-color: #d1c4e9; /* Roxo claro */
+            background-color: #d1c4e9;
         }
         input[type="number"], input[type="text"] {
             width: 100%;
@@ -157,42 +157,6 @@
     </div>
 
     <script>
-        function generateTable() {
-            const month = document.getElementById('month').value;
-            const tableBody = document.getElementById('schedule-table');
-            tableBody.innerHTML = '';
-
-            const daysInMonth = new Date(2025, month, 0).getDate();
-            const weekdays = ['DOM.', 'SEG.', 'TER.', 'QUA.', 'QUI.', 'SEX.', 'SÁB.'];
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(2025, month - 1, day);
-                const weekday = weekdays[date.getDay()];
-
-                const row = document.createElement('tr');
-
-                if (weekday === 'SÁB.') {
-                    row.classList.add('saturday');
-                } else if (weekday === 'DOM.') {
-                    row.classList.add('sunday');
-                }
-
-                row.innerHTML = `
-                    <td>${date.toLocaleDateString('pt-BR')}</td>
-                    <td>${weekday}</td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
-                    <td class="total">0</td>
-                    <td><input type="text" placeholder="Horário"></td>
-                    <td><input type="text" placeholder="Demanda"></td>
-                    <td><input type="checkbox" onchange="markHoliday(this)"></td>
-                `;
-                tableBody.appendChild(row);
-            }
-            updateMonthlyTotal();
-        }
-
         async function saveData() {
             const docente = document.getElementById('docente').value;
             const month = document.getElementById('month').value;
@@ -233,38 +197,8 @@
             }
         }
 
-        function updateTotal(input) {
-            const row = input.parentElement.parentElement;
-            const cells = row.querySelectorAll('input[type="number"]');
-            const totalCell = row.querySelector('.total');
-            let total = 0;
-
-            cells.forEach(cell => {
-                total += parseFloat(cell.value) || 0;
-            });
-
-            totalCell.textContent = total.toFixed(1);
-            updateMonthlyTotal();
-        }
-
-        function updateMonthlyTotal() {
-            const totalCells = document.querySelectorAll('.total');
-            let monthlyTotal = 0;
-
-            totalCells.forEach(cell => {
-                monthlyTotal += parseFloat(cell.textContent) || 0;
-            });
-
-            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
-        }
-
-        function markHoliday(checkbox) {
-            const row = checkbox.parentElement.parentElement;
-            if (checkbox.checked) {
-                row.classList.add('holiday');
-            } else {
-                row.classList.remove('holiday');
-            }
+        function generateTable() {
+            // Sua lógica atual para gerar tabela
         }
 
         function goBack() {
