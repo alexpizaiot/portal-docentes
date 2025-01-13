@@ -6,11 +6,43 @@
     <title>Cadastro de Horários</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Cadastro de Horários</h1>
-        <button class="save-button" onclick="saveTestData()">Gravar Dados de Teste</button>
+        <h1>Teste de Gravação no Firebase</h1>
+        <button onclick="saveTestData()">Gravar Dados de Teste</button>
     </div>
 
     <script>
@@ -24,25 +56,25 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
-        // Inicializa o Firebase
+        // Inicialização do Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const db = firebase.firestore();
 
-        // Função para salvar dados de teste no Firebase
+        // Função para gravar dados de teste
         async function saveTestData() {
             try {
-                const docRef = await db.collection("horarios_teste").add({
-                    docente: "Docente Teste",
-                    mes: "Janeiro",
+                await db.collection("horarios_teste").add({
+                    docente: "Teste Docente",
+                    mes: "1",
                     horarios: [
-                        { data: "01/01/2025", manha: 2, tarde: 3, noite: 4, total: 9 },
-                        { data: "02/01/2025", manha: 1, tarde: 2, noite: 3, total: 6 }
+                        { data: "01/01/2025", manha: 2, tarde: 3, noite: 1 },
+                        { data: "02/01/2025", manha: 3, tarde: 4, noite: 0 },
                     ]
                 });
-                alert(`Dados gravados com sucesso! ID do documento: ${docRef.id}`);
+                alert("Dados gravados com sucesso!");
             } catch (error) {
                 console.error("Erro ao gravar os dados no Firebase:", error);
-                alert("Erro ao gravar os dados no Firebase. Confira o console para mais detalhes.");
+                alert("Erro ao gravar os dados no Firebase. Veja o console para mais detalhes.");
             }
         }
     </script>
