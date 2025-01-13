@@ -80,8 +80,8 @@
             background-color: #0056b3;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -93,8 +93,19 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
+        // Inicializar Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const db = firebase.firestore();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const nivelAcesso = localStorage.getItem("nivelAcesso");
+            const usuarioLogado = localStorage.getItem("usuarioLogado");
+
+            if (!usuarioLogado || !nivelAcesso || nivelAcesso !== "gestor") {
+                alert("Acesso negado. Você será redirecionado para o login.");
+                window.location.href = "index.html";
+            }
+        });
 
         function generateTable() {
             const month = document.getElementById('month').value;
@@ -110,7 +121,6 @@
 
                 const row = document.createElement('tr');
 
-                // Aplica classes de estilo para sábado, domingo e feriados
                 if (weekday === 'SÁB.') {
                     row.classList.add('saturday');
                 } else if (weekday === 'DOM.') {
@@ -167,46 +177,41 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        async function saveData() {
-            try {
-                const docente = document.getElementById('docente').value;
-                const month = document.getElementById('month').value;
-                const rows = document.querySelectorAll('#schedule-table tr');
+        function saveData() {
+            const docente = document.getElementById('docente').value;
+            const mes = document.getElementById('month').value;
+            const horarios = [];
 
-                const horarios = [];
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    const data = cells[0].textContent;
-                    const dia = cells[1].textContent;
-                    const manha = parseFloat(cells[2].querySelector('input').value) || 0;
-                    const tarde = parseFloat(cells[3].querySelector('input').value) || 0;
-                    const noite = parseFloat(cells[4].querySelector('input').value) || 0;
-                    const acumulado = parseFloat(cells[5].textContent) || 0;
-                    const horario = cells[6].querySelector('input').value || '';
-                    const demanda = cells[7].querySelector('input').value || '';
-                    const feriado = cells[8].querySelector('input').checked;
+            const rows = document.querySelectorAll('#schedule-table tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const data = {
+                    data: row.cells[0].textContent,
+                    dia: row.cells[1].textContent,
+                    manha: parseFloat(inputs[0].value) || 0,
+                    tarde: parseFloat(inputs[1].value) || 0,
+                    noite: parseFloat(inputs[2].value) || 0,
+                    acumulado: parseFloat(row.cells[5].textContent) || 0,
+                    horario: inputs[3].value,
+                    demanda: inputs[4].value,
+                    feriado: inputs[5].checked
+                };
+                horarios.push(data);
+            });
 
-                    horarios.push({ data, dia, manha, tarde, noite, acumulado, horario, demanda, feriado });
-                });
-
-                await db.collection('horarios').add({
-                    docente,
-                    mes: month,
-                    horarios
-                });
-
-                alert('Dados gravados com sucesso no Firebase!');
-            } catch (error) {
-                console.error('Erro ao salvar no Firebase:', error);
-                alert('Erro ao salvar no Firebase. Confira o console para mais detalhes.');
-            }
+            db.collection('horarios').add({
+                docente: docente,
+                mes: mes,
+                horarios: horarios
+            })
+            .then(() => alert('Dados gravados com sucesso!'))
+            .catch(error => console.error('Erro ao salvar no Firebase:', error));
         }
 
         function goBack() {
             window.location.href = "dashboard.html?nivel=gestor";
         }
 
-        // Gera a tabela inicial
         generateTable();
     </script>
 </head>
