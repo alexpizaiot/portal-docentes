@@ -80,25 +80,55 @@
             background-color: #0056b3;
         }
     </style>
-    <script type="module">
-        // Importação dos pacotes do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Horários</h1>
+        <label for="docente">Selecione o docente:</label>
+        <select id="docente">
+            <option value="docente1">Docente 1</option>
+            <option value="docente2">Docente 2</option>
+            <option value="docente3">Docente 3</option>
+        </select>
+        <label for="month">Selecione o mês:</label>
+        <select id="month" onchange="generateTable()">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+        </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Dia</th>
+                    <th>Manhã</th>
+                    <th>Tarde</th>
+                    <th>Noite</th>
+                    <th>Acumulado</th>
+                    <th>Horário</th>
+                    <th>Demanda</th>
+                    <th>Feriado</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-table">
+                <!-- Linhas serão geradas dinamicamente -->
+            </tbody>
+        </table>
+        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
+        <button class="save-button" onclick="saveData()">Gravar Dados</button>
+        <button class="back-button" onclick="goBack()">Voltar</button>
+    </div>
 
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
-            authDomain: "portaldocentes-fb404.firebaseapp.com",
-            projectId: "portaldocentes-fb404",
-            storageBucket: "portaldocentes-fb404.appspot.com",
-            messagingSenderId: "837457806876",
-            appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
-        };
-
-        // Inicializar Firebase e Firestore
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
+    <script>
         function generateTable() {
             const month = document.getElementById('month').value;
             const tableBody = document.getElementById('schedule-table');
@@ -170,52 +200,8 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        async function saveData() {
-            try {
-                const docente = document.getElementById("docente").value;
-                const mes = document.getElementById("month").value;
-                const tabela = document.querySelectorAll("#schedule-table tr");
-
-                const horarios = [];
-                tabela.forEach((linha, index) => {
-                    if (index > 0) { // Ignorar o cabeçalho
-                        const celulas = linha.querySelectorAll("td");
-                        const data = celulas[0].innerText;
-                        const dia = celulas[1].innerText;
-                        const manha = celulas[2].querySelector("input").value || 0;
-                        const tarde = celulas[3].querySelector("input").value || 0;
-                        const noite = celulas[4].querySelector("input").value || 0;
-                        const acumulado = celulas[5].innerText || 0;
-                        const horario = celulas[6].querySelector("input").value || "";
-                        const demanda = celulas[7].querySelector("input").value || "";
-                        const feriado = celulas[8].querySelector("input").checked;
-
-                        horarios.push({
-                            data,
-                            dia,
-                            manha: parseFloat(manha),
-                            tarde: parseFloat(tarde),
-                            noite: parseFloat(noite),
-                            acumulado: parseFloat(acumulado),
-                            horario,
-                            demanda,
-                            feriado
-                        });
-                    }
-                });
-
-                const docRef = doc(collection(db, "horarios"));
-                await setDoc(docRef, {
-                    docente,
-                    mes,
-                    horarios
-                });
-
-                alert("Dados salvos com sucesso!");
-            } catch (error) {
-                console.error("Erro ao salvar no Firebase:", error);
-                alert("Erro ao salvar os dados.");
-            }
+        function saveData() {
+            // Função de gravação no Firebase
         }
 
         function goBack() {
@@ -225,52 +211,5 @@
         // Gera a tabela inicial
         generateTable();
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Cadastro de Horários</h1>
-        <label for="docente">Selecione o docente:</label>
-        <select id="docente">
-            <option value="docente1">Docente 1</option>
-            <option value="docente2">Docente 2</option>
-            <option value="docente3">Docente 3</option>
-        </select>
-        <label for="month">Selecione o mês:</label>
-        <select id="month" onchange="generateTable()">
-            <option value="1">Janeiro</option>
-            <option value="2">Fevereiro</option>
-            <option value="3">Março</option>
-            <option value="4">Abril</option>
-            <option value="5">Maio</option>
-            <option value="6">Junho</option>
-            <option value="7">Julho</option>
-            <option value="8">Agosto</option>
-            <option value="9">Setembro</option>
-            <option value="10">Outubro</option>
-            <option value="11">Novembro</option>
-            <option value="12">Dezembro</option>
-        </select>
-        <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Dia</th>
-                    <th>Manhã</th>
-                    <th>Tarde</th>
-                    <th>Noite</th>
-                    <th>Acumulado</th>
-                    <th>Horário</th>
-                    <th>Demanda</th>
-                    <th>Feriado</th>
-                </tr>
-            </thead>
-            <tbody id="schedule-table">
-                <!-- Linhas serão geradas dinamicamente -->
-            </tbody>
-        </table>
-        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
-        <button class="save-button" onclick="saveData()">Gravar Dados</button>
-        <button class="back-button" onclick="goBack()">Voltar</button>
-    </div>
 </body>
 </html>
