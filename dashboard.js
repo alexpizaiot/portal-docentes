@@ -20,9 +20,18 @@ const db = getFirestore(app);
 document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            window.location.href = 'index.html'; // Redireciona para login
+            // Redirecionar para a página de login
+            window.location.href = 'index.html';
         } else {
             console.log("Usuário autenticado:", user.email);
+            localStorage.setItem("usuarioLogado", user.email);
+
+            // Carregar nível de acesso, se não estiver presente
+            if (!localStorage.getItem("nivelAcesso")) {
+                // Simulação de definição de nível (substitua pela lógica real)
+                localStorage.setItem("nivelAcesso", "gestor"); // Exemplo fixo para teste
+            }
+
             initializeDashboard(user);
         }
     });
@@ -40,18 +49,9 @@ function initializeDashboard(user) {
     const menuButton = document.getElementById("menuButton");
     const sidebar = document.getElementById("sidebar");
 
-    // Recupera ou define o nível de acesso
-    let userLevel = localStorage.getItem("nivelAcesso") || new URLSearchParams(window.location.search).get("nivel");
+    const userLevel = localStorage.getItem("nivelAcesso");
 
-    if (!userLevel) {
-        alert("Nível de acesso não definido. Redirecionando para login.");
-        window.location.href = 'index.html';
-        return;
-    }
-
-    localStorage.setItem("nivelAcesso", userLevel); // Garante persistência do nível de acesso
-
-    // Exibir menus específicos com base no nível de acesso
+    // Exibir menus com base no nível de acesso
     if (userLevel === "gestor") {
         if (usuariosMenuItem) usuariosMenuItem.classList.remove("d-none");
         if (cadastroHorariosMenuItem) cadastroHorariosMenuItem.classList.remove("d-none");
@@ -68,7 +68,7 @@ function initializeDashboard(user) {
         // Menu Cadastro de Horários
         if (cadastroHorariosMenuItem) {
             cadastroHorariosMenuItem.addEventListener("click", () => {
-                window.location.href = "cadastro_horarios.html"; // Redireciona para a página
+                window.location.href = "cadastro_horarios.html";
             });
         }
     } else {
@@ -131,10 +131,36 @@ function initializeDashboard(user) {
         }
     }
 
+    // Adicionar novo usuário
+    if (addUserForm) {
+        addUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault(); // Previne o reload da página
+            const email = emailInput.value;
+            const nivel = levelSelect.value;
+
+            if (!email || !nivel) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "autorizados"), { email, nivel });
+                alert("Usuário adicionado com sucesso!");
+                emailInput.value = ""; // Limpa o campo de e-mail
+                levelSelect.value = ""; // Limpa o nível selecionado
+                loadUsers(); // Recarrega a lista de usuários
+            } catch (error) {
+                console.error("Erro ao adicionar usuário:", error);
+                alert("Não foi possível adicionar o usuário.");
+            }
+        });
+    }
+
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         try {
             await signOut(auth);
+            localStorage.clear(); // Limpa o estado de login
             window.location.href = 'index.html';
         } catch (error) {
             console.error("Erro ao sair:", error);
