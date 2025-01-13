@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Horários</title>
     <style>
+        /* Estilos básicos */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -34,13 +35,13 @@
             color: #fff;
         }
         tr.saturday {
-            background-color: #fff9c4;
+            background-color: #fff9c4; /* Amarelo claro */
         }
         tr.sunday {
-            background-color: #ffcccb;
+            background-color: #ffcccb; /* Vermelho claro */
         }
         tr.holiday {
-            background-color: #d1c4e9;
+            background-color: #d1c4e9; /* Roxo claro */
         }
         input[type="number"], input[type="text"] {
             width: 100%;
@@ -79,7 +80,7 @@
             background-color: #0056b3;
         }
     </style>
-    <!-- Firebase JS SDK -->
+    <!-- Firebase App e Firestore -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script>
@@ -93,8 +94,21 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
+        // Inicializa o Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const db = firebase.firestore();
+    </script>
+    <script>
+        // Verifica se o usuário está autenticado e se tem nível de acesso 'gestor'
+        document.addEventListener("DOMContentLoaded", () => {
+            const nivelAcesso = localStorage.getItem("nivelAcesso");
+            const usuarioLogado = localStorage.getItem("usuarioLogado");
+
+            if (!usuarioLogado || !nivelAcesso || nivelAcesso !== "gestor") {
+                alert("Acesso negado. Você será redirecionado para o login.");
+                window.location.href = "index.html";
+            }
+        });
 
         function generateTable() {
             const month = document.getElementById('month').value;
@@ -170,40 +184,35 @@
         async function saveData() {
             const docente = document.getElementById('docente').value;
             const month = document.getElementById('month').value;
-            const rows = document.querySelectorAll('#schedule-table tr');
-            const horarios = [];
+            const tableRows = document.querySelectorAll('#schedule-table tr');
 
-            rows.forEach(row => {
+            const horario = Array.from(tableRows).map(row => {
                 const cells = row.querySelectorAll('td');
                 const inputs = row.querySelectorAll('input');
 
-                horarios.push({
+                return {
                     data: cells[0].textContent,
                     dia: cells[1].textContent,
                     manha: parseFloat(inputs[0].value) || 0,
                     tarde: parseFloat(inputs[1].value) || 0,
                     noite: parseFloat(inputs[2].value) || 0,
                     acumulado: parseFloat(cells[5].textContent) || 0,
-                    horario: inputs[3].value || "",
-                    demanda: inputs[4].value || "",
-                    feriado: inputs[5].checked
-                });
+                    horario: inputs[3].value || '',
+                    demanda: inputs[4].value || '',
+                    feriado: inputs[5].checked || false
+                };
             });
-
-            const totalMensal = horarios.reduce((sum, h) => sum + h.acumulado, 0);
 
             try {
                 await db.collection('horarios').add({
-                    docente,
+                    docente: docente,
                     mes: month,
-                    ano: "2025",
-                    horario: horarios,
-                    totalmensal: totalMensal
+                    horario: horario
                 });
                 alert('Dados gravados com sucesso no Firebase!');
             } catch (error) {
-                console.error('Erro ao salvar no Firebase:', error);
-                alert('Erro ao salvar os dados.');
+                console.error("Erro ao salvar no Firebase:", error);
+                alert('Erro ao salvar os dados no Firebase.');
             }
         }
 
@@ -211,7 +220,8 @@
             window.location.href = "dashboard.html?nivel=gestor";
         }
 
-        document.addEventListener('DOMContentLoaded', generateTable);
+        // Gera a tabela inicial
+        generateTable();
     </script>
 </head>
 <body>
@@ -252,7 +262,9 @@
                     <th>Feriado</th>
                 </tr>
             </thead>
-            <tbody id="schedule-table"></tbody>
+            <tbody id="schedule-table">
+                <!-- Linhas serão geradas dinamicamente -->
+            </tbody>
         </table>
         <div class="total-month" id="total-month">Total mensal: 0 horas</div>
         <button class="save-button" onclick="saveData()">Gravar Dados</button>
