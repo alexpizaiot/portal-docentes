@@ -85,7 +85,7 @@
         <h1>Cadastro de Horários</h1>
         <label for="docente">Selecione o docente:</label>
         <select id="docente">
-            <option value="">Carregando docentes...</option>
+            <option value="">Carregando...</option>
         </select>
         <label for="month">Selecione o mês:</label>
         <select id="month" onchange="generateTable()">
@@ -127,7 +127,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
             authDomain: "portaldocentes-fb404.firebaseapp.com",
@@ -140,23 +139,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Função para carregar os docentes na listbox
         async function loadDocentes() {
             const docenteSelect = document.getElementById('docente');
             docenteSelect.innerHTML = '<option value="">Selecione um docente</option>';
 
             try {
-                const snapshot = await db.collection('autorizados').where('nivel', '==', 'docente').get();
+                const snapshot = await db.collection('autorizados').get();
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const option = document.createElement('option');
-                    option.value = data.email; // Pode ser ajustado para outro identificador
-                    option.textContent = data.Nome;
+                    option.value = data.nome;
+                    option.textContent = data.nome;
                     docenteSelect.appendChild(option);
                 });
             } catch (error) {
-                console.error('Erro ao carregar docentes:', error);
-                docenteSelect.innerHTML = '<option value="">Erro ao carregar docentes</option>';
+                console.error("Erro ao carregar docentes:", error);
             }
         }
 
@@ -233,8 +230,42 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
-        function saveData() {
-            alert("Salvar funcionalidade em desenvolvimento.");
+        async function saveData() {
+            const docente = document.getElementById('docente').value;
+            const month = document.getElementById('month').value;
+            const rows = document.querySelectorAll('#schedule-table tr');
+
+            if (!docente || !month) {
+                alert("Selecione um docente e um mês antes de salvar.");
+                return;
+            }
+
+            const horarios = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('input');
+                const data = row.cells[0].textContent;
+                horarios.push({
+                    data: data,
+                    manha: parseFloat(cells[0].value) || 0,
+                    tarde: parseFloat(cells[1].value) || 0,
+                    noite: parseFloat(cells[2].value) || 0,
+                    horario: cells[3].value,
+                    demanda: cells[4].value,
+                    feriado: cells[5].checked
+                });
+            });
+
+            try {
+                await db.collection('horarios_teste_novo').doc(`${docente}_${month}`).set({
+                    docente: docente,
+                    mes: month,
+                    horarios: horarios
+                });
+                alert("Dados gravados com sucesso!");
+            } catch (error) {
+                console.error("Erro ao gravar os dados:", error);
+                alert("Erro ao gravar os dados. Veja o console para mais detalhes.");
+            }
         }
 
         function goBack() {
