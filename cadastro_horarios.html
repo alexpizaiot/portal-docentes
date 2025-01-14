@@ -79,6 +79,9 @@
             background-color: #0056b3;
         }
     </style>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -124,9 +127,8 @@
         <button class="back-button" onclick="goBack()">Voltar</button>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD9cXBzN-b5z-390MWcmIpTjuNyKhWXhCo",
             authDomain: "portaldocentes-fb404.firebaseapp.com",
@@ -136,27 +138,32 @@
             appId: "1:837457806876:web:c2d8104e26c2ad96d041d9"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // Inicializando Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
 
+        // Carregar nomes dos docentes
         async function loadDocentes() {
             const docenteSelect = document.getElementById('docente');
-            docenteSelect.innerHTML = '<option value="">Selecione um docente</option>';
+            docenteSelect.innerHTML = '<option value="">Selecione...</option>';
 
             try {
                 const snapshot = await db.collection('autorizados').get();
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const option = document.createElement('option');
-                    option.value = data.nome;
-                    option.textContent = data.nome;
-                    docenteSelect.appendChild(option);
+                    if (data.nivel === 'docente') {
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = data.Nome;
+                        docenteSelect.appendChild(option);
+                    }
                 });
             } catch (error) {
                 console.error("Erro ao carregar docentes:", error);
             }
         }
 
+        // Gerar tabela de horários
         function generateTable() {
             const monthSelect = document.getElementById('month');
             const tableBody = document.getElementById('schedule-table');
@@ -196,6 +203,7 @@
             updateMonthlyTotal();
         }
 
+        // Atualizar total por linha e mensal
         function updateTotal(input) {
             const row = input.parentElement.parentElement;
             const cells = row.querySelectorAll('input[type="number"]');
@@ -230,22 +238,23 @@
             document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
         }
 
+        // Gravar dados no Firestore
         async function saveData() {
             const docente = document.getElementById('docente').value;
             const month = document.getElementById('month').value;
             const rows = document.querySelectorAll('#schedule-table tr');
 
             if (!docente || !month) {
-                alert("Selecione um docente e um mês antes de salvar.");
+                alert("Por favor, selecione um docente e um mês.");
                 return;
             }
 
             const horarios = [];
+
             rows.forEach(row => {
                 const cells = row.querySelectorAll('input');
-                const data = row.cells[0].textContent;
                 horarios.push({
-                    data: data,
+                    data: row.cells[0].textContent,
                     manha: parseFloat(cells[0].value) || 0,
                     tarde: parseFloat(cells[1].value) || 0,
                     noite: parseFloat(cells[2].value) || 0,
@@ -257,14 +266,14 @@
 
             try {
                 await db.collection('horarios_teste_novo').doc(`${docente}_${month}`).set({
-                    docente: docente,
+                    docente,
                     mes: month,
-                    horarios: horarios
+                    horarios
                 });
                 alert("Dados gravados com sucesso!");
             } catch (error) {
-                console.error("Erro ao gravar os dados:", error);
-                alert("Erro ao gravar os dados. Veja o console para mais detalhes.");
+                console.error("Erro ao gravar dados:", error);
+                alert("Erro ao gravar dados. Consulte o console.");
             }
         }
 
