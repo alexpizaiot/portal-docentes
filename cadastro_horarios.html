@@ -33,11 +33,29 @@
             background-color: #007BFF;
             color: #fff;
         }
+        tr.saturday {
+            background-color: #fff9c4;
+        }
+        tr.sunday {
+            background-color: #ffcccb;
+        }
+        tr.holiday {
+            background-color: #d1c4e9;
+        }
         input[type="number"], input[type="text"] {
             width: 100%;
             padding: 5px;
         }
-        .save-button {
+        input[type="checkbox"] {
+            margin: 0 auto;
+        }
+        .total-month {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .save-button, .back-button {
             display: block;
             width: 100%;
             padding: 10px;
@@ -46,10 +64,19 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
+        }
+        .save-button {
             background-color: #28a745;
         }
         .save-button:hover {
             background-color: #218838;
+        }
+        .back-button {
+            background-color: #007BFF;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -58,9 +85,8 @@
         <h1>Cadastro de Horários</h1>
         <label for="docente">Selecione o docente:</label>
         <select id="docente">
-            <option value="">Carregando...</option>
+            <option value="">Carregando docentes...</option>
         </select>
-
         <label for="month">Selecione o mês:</label>
         <select id="month" onchange="generateTable()">
             <option value="1">Janeiro</option>
@@ -76,27 +102,30 @@
             <option value="11">Novembro</option>
             <option value="12">Dezembro</option>
         </select>
-
         <table>
             <thead>
                 <tr>
                     <th>Data</th>
+                    <th>Dia</th>
                     <th>Manhã</th>
                     <th>Tarde</th>
                     <th>Noite</th>
-                    <th>Total</th>
+                    <th>Acumulado</th>
+                    <th>Horário</th>
+                    <th>Demanda</th>
+                    <th>Feriado</th>
                 </tr>
             </thead>
             <tbody id="schedule-table">
             </tbody>
         </table>
-
+        <div class="total-month" id="total-month">Total mensal: 0 horas</div>
         <button class="save-button" onclick="saveData()">Gravar Dados</button>
+        <button class="back-button" onclick="goBack()">Voltar</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -111,97 +140,109 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Preencher a listbox com nomes da coleção "autorizados"
-        async function populateDocenteList() {
-            const docenteSelect = document.getElementById("docente");
-            try {
-                const querySnapshot = await db.collection("autorizados").get();
-                docenteSelect.innerHTML = ""; // Limpar opções
+        // Função para carregar os docentes na listbox
+        async function loadDocentes() {
+            const docenteSelect = document.getElementById('docente');
+            docenteSelect.innerHTML = '<option value="">Selecione um docente</option>';
 
-                querySnapshot.forEach(doc => {
+            try {
+                const snapshot = await db.collection('autorizados').where('nivel', '==', 'docente').get();
+                snapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.nivel === "docente") { // Apenas docentes
-                        const option = document.createElement("option");
-                        option.value = doc.id; // ID do documento
-                        option.textContent = data.Nome; // Nome do docente
-                        docenteSelect.appendChild(option);
-                    }
+                    const option = document.createElement('option');
+                    option.value = data.email; // Pode ser ajustado para outro identificador
+                    option.textContent = data.Nome;
+                    docenteSelect.appendChild(option);
                 });
             } catch (error) {
-                console.error("Erro ao carregar docentes:", error);
-                docenteSelect.innerHTML = "<option value=''>Erro ao carregar</option>";
+                console.error('Erro ao carregar docentes:', error);
+                docenteSelect.innerHTML = '<option value="">Erro ao carregar docentes</option>';
             }
         }
 
-        // Gerar a tabela com base no mês selecionado
         function generateTable() {
-            const month = document.getElementById("month").value;
-            const tableBody = document.getElementById("schedule-table");
-            tableBody.innerHTML = "";
+            const monthSelect = document.getElementById('month');
+            const tableBody = document.getElementById('schedule-table');
 
-            const daysInMonth = new Date(2025, month, 0).getDate();
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-                    <td>${day}/${month}/2025</td>
-                    <td><input type="number" min="0" step="0.1"></td>
-                    <td><input type="number" min="0" step="0.1"></td>
-                    <td><input type="number" min="0" step="0.1"></td>
-                    <td class="total">0</td>
-                `;
-
-                tableBody.appendChild(row);
-            }
-        }
-
-        // Salvar os dados no Firebase
-        async function saveData() {
-            const docenteSelect = document.getElementById("docente");
-            const month = document.getElementById("month").value;
-
-            if (!docenteSelect.value || !month) {
-                alert("Selecione o docente e o mês antes de salvar.");
+            if (!monthSelect || !tableBody) {
+                console.error("Elementos necessários não encontrados.");
                 return;
             }
 
-            const docenteName = docenteSelect.options[docenteSelect.selectedIndex].text;
-            const horarios = [];
-            const rows = document.querySelectorAll("#schedule-table tr");
+            const month = monthSelect.value;
+            tableBody.innerHTML = '';
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("input");
-                const total = Array.from(cells).reduce((sum, cell) => sum + (parseFloat(cell.value) || 0), 0);
-                horarios.push({
-                    data: row.cells[0].textContent,
-                    manha: parseFloat(cells[0]?.value) || 0,
-                    tarde: parseFloat(cells[1]?.value) || 0,
-                    noite: parseFloat(cells[2]?.value) || 0,
-                    total
-                });
+            const daysInMonth = new Date(2025, month, 0).getDate();
+            const weekdays = ['DOM.', 'SEG.', 'TER.', 'QUA.', 'QUI.', 'SEX.', 'SÁB.'];
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(2025, month - 1, day);
+                const weekday = weekdays[date.getDay()];
+
+                const row = document.createElement('tr');
+                if (weekday === 'SÁB.') row.classList.add('saturday');
+                if (weekday === 'DOM.') row.classList.add('sunday');
+
+                row.innerHTML = `
+                    <td>${date.toLocaleDateString('pt-BR')}</td>
+                    <td>${weekday}</td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td><input type="number" step="0.1" min="0" onchange="updateTotal(this)"></td>
+                    <td class="total">0</td>
+                    <td><input type="text" placeholder="Horário"></td>
+                    <td><input type="text" placeholder="Demanda"></td>
+                    <td><input type="checkbox" onchange="markHoliday(this)"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+            updateMonthlyTotal();
+        }
+
+        function updateTotal(input) {
+            const row = input.parentElement.parentElement;
+            const cells = row.querySelectorAll('input[type="number"]');
+            const totalCell = row.querySelector('.total');
+            let total = 0;
+
+            cells.forEach(cell => {
+                total += parseFloat(cell.value) || 0;
             });
 
-            const data = {
-                docenteName,
-                month,
-                horarios,
-                timestamp: new Date()
-            };
+            totalCell.textContent = total.toFixed(1);
+            updateMonthlyTotal();
+        }
 
-            try {
-                await db.collection("horario_teste_novo").add(data);
-                alert("Dados gravados com sucesso!");
-            } catch (error) {
-                console.error("Erro ao gravar os dados:", error);
-                alert("Erro ao gravar os dados. Veja o console para mais detalhes.");
+        function markHoliday(checkbox) {
+            const row = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                row.classList.add('holiday');
+            } else {
+                row.classList.remove('holiday');
             }
         }
 
-        // Carregar os docentes ao carregar a página
-        document.addEventListener("DOMContentLoaded", () => {
-            populateDocenteList();
-        });
+        function updateMonthlyTotal() {
+            const totalCells = document.querySelectorAll('.total');
+            let monthlyTotal = 0;
+
+            totalCells.forEach(cell => {
+                monthlyTotal += parseFloat(cell.textContent) || 0;
+            });
+
+            document.getElementById('total-month').textContent = `Total mensal: ${monthlyTotal.toFixed(1)} horas`;
+        }
+
+        function saveData() {
+            alert("Salvar funcionalidade em desenvolvimento.");
+        }
+
+        function goBack() {
+            window.location.href = "dashboard.html?nivel=gestor";
+        }
+
+        loadDocentes();
+        generateTable();
     </script>
 </body>
 </html>
